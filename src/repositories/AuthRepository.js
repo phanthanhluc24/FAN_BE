@@ -5,12 +5,12 @@ const JWT = require("jsonwebtoken")
 const dotenv = require("dotenv")
 dotenv.config()
 const CODE_TOKEN = process.env.CODE_TOKEN
-const Mail=require("../utils/sendEmail")
+const Mail = require("../utils/sendEmail")
 class AuthRepository {
     async register(req, res) {
         const { full_name, email, number_phone, password, address, role, category_id } = req.body
         try {
-            if (validator.isEmpty(full_name) || validator.isEmpty(email) ||validator.isEmpty(number_phone) ||validator.isEmpty(password)) {
+            if (validator.isEmpty(full_name) || validator.isEmpty(email) || validator.isEmpty(number_phone) || validator.isEmpty(password)) {
                 return res.status(401).json({ status: 401, message: "All field is required" })
             }
             if (!validator.isEmail(email)) {
@@ -43,14 +43,39 @@ class AuthRepository {
             user.role = role
             user.category_id = category_id
             const newUser = await user.save()
-            const code=Math.floor(1000  + Math.random() * 900000)
+            const code = Math.floor(1000 + Math.random() * 9000)
             new Mail(newUser).sendCodeToConfirm(code)
-            const codeToken = await JWT.sign({code:code}, CODE_TOKEN,{expiresIn:"3m"})
-            return res.status(200).json({ status: 200, message: "Create new account successfully", code:codeToken })
+            const codeToken = await JWT.sign({ code: code, _id: newUser._id }, CODE_TOKEN, { expiresIn: "3m" })
+            return res.status(200).json({ status: 200, message: "Create new account successfully", code: codeToken })
         } catch (error) {
             return res.status(500).json({ status: 500, message: error })
         }
 
+    }
+
+    async verificationCode(req, res) {
+        const { codeToken, code } = req.body
+        try {
+            if (validator.isEmpty(codeToken) || validator.isEmpty(code)) {
+                return res.status(401).json({status:401,message:"Code verification is required"})
+            }
+            const decode = JWT.verify(codeToken, CODE_TOKEN)
+            const user = await UserModel.findOne({ _id: decode._id })
+            if (!user) {
+                return res.status(401).json({status:401,message:"User not found"})
+            }
+            if (decode.code == code) {
+                user.status="active"
+                user.save()
+                return res.status(201).json({status:201,message:"Verification account successfully"})
+            }else{
+                return res.status(401).json({status:401,message:"Invalid code verification account"})
+            }
+        } catch (error) {
+            if(error.name=="TokenExpiredError"){
+                return res.status(401).json({status:401,message:"Token code expired!"})
+            }
+        }
     }
 }
 module.exports = new AuthRepository()
