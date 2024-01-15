@@ -6,5 +6,11 @@ class AuthController{
     async verificationCode(req,res){
         await AuthRepository.verificationCode(req,res)
     }
+    async reSendVerificationCode(req,res){
+        await AuthRepository.reSendVerificationCode(req,res)
+    }
+    async login(req,res){
+        await AuthRepository.login(req,res)
+    }
 }
 module.exports=new AuthController()
