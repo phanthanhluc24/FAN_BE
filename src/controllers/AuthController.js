@@ -12,5 +12,8 @@ class AuthController{
     async login(req,res){
         await AuthRepository.login(req,res)
     }
+    async verificationAccount(req,res){
+        await AuthRepository.verificationAccount(req,res)
+    }
 }
 module.exports=new AuthController()
