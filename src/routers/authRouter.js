@@ -5,4 +5,5 @@ router.post("/register",AuthController.register)
 router.post("/verificationCode",AuthController.verificationCode)
 router.post("/reSendVerificationCode",AuthController.reSendVerificationCode)
 router.post("/login",AuthController.login)
+router.post("/verificationAccount",AuthController.verificationAccount)
 module.exports=router
