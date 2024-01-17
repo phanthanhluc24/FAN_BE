@@ -147,5 +147,37 @@ class AuthRepository {
         const resetPasswordToken = await JWT.sign({ _id: user._id }, RESET_PASSWORD_TOKEN, { expiresIn: "1h" })
         return res.status(201).json({ status: 201, message: "Xác thực tài khản thành công", code: codeToken, refreshCode: refreshCode, resetPasswordToken: resetPasswordToken })
     }
+
+    async resetNewPassword(req,res){
+        const {tokenPassword,newPassword,confirmPassword}=req.body
+        try {
+            if (validator.isEmpty(newPassword)|| validator.isEmpty(confirmPassword)) {
+                return res.status(401).json({status:401,message:"Mật khẩu không được bỏ trống"})
+            }
+            const options = {
+                minLength: 8,
+                minLowercase: 1,
+                minUppercase: 1,
+                minNumbers: 1,
+                minSymbols: 1,
+            }
+            if(newPassword !=confirmPassword){
+                return res.status(401).json({status:401,message:"Xác thực mật khẩu không khớp"})
+            }
+            if (!validator.isStrongPassword(newPassword, options)) {
+                return res.status(401).json({ status: 401, message: "Mật khẩu quá yếu" })
+            }
+            const decode=JWT.verify(tokenPassword,RESET_PASSWORD_TOKEN)
+            const user = await UserModel.findById(decode._id)
+            const hasPassword=await bcrypt.hash(newPassword,10)
+            user.password=hasPassword
+            user.save()
+            return res.status(201).json({status:201,message:"Lấy lại mật khẩu mới thành công"})
+        } catch (error) {
+            if (error.name=="TokenExpiredError") {
+                return res.status(401).json({ status: 401, message: "Thời gian lấy lại mật khẩu đã hết hạn" })
+            }
+        }
+    }
 }
 module.exports = new AuthRepository()
