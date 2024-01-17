@@ -6,6 +6,7 @@ const mongoose=require("mongoose")
 const PORT=process.env.PORT
 const DATABASE=process.env.DATABASE
 const router=require("./src/routers/Index")
+const cors=require("cors")
 // config get value from body
 app.use(express.urlencoded({extended:true,limit:"10mb"}))
 app.use(express.json({limit:"10mb"}))
@@ -17,6 +18,8 @@ mongoose.connect(DATABASE)
 .catch((error)=>{
     console.log(error);
 })
+// config cors
+app.use("*",cors())
 // use public router
 router(app)
 // Server listening on port
