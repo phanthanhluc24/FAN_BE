@@ -9,7 +9,8 @@ const userSchema=new Schema({
     image:{type:String,default:""},
     role:{type:String,enum:["ADM","USR","RPM"],default:"USR"},
     status:{type:String,enum:["active","inactive"],default:"inactive"},
-    category_id:{type:Schema.Types.ObjectId,ref:"category",require:false}
+    category_id:{type:Schema.Types.ObjectId,ref:"category",require:false},
+    refreshToken:{type:String,default:""}
 },{
     timestamps:true
 })

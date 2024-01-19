@@ -7,4 +7,5 @@ router.post("/reSendVerificationCode",AuthController.reSendVerificationCode)
 router.post("/login",AuthController.login)
 router.post("/verificationAccount",AuthController.verificationAccount)
 router.post("/resetNewPassword",AuthController.resetNewPassword)
+router.post("/refreshToken",AuthController.refreshToken)
 module.exports=router
