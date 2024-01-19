@@ -118,16 +118,18 @@ class AuthRepository {
         if (!comparePassword) {
             return res.status(401).json({ status: 401, message: "Mật khẩu không đúng" })
         }
-        const accessToken = await this.generateAccessToken(user._id)
-        const refreshToken = await this.generateRefreshToken(user._id)
+        const accessToken = await this.generateAccessToken({_id:user._id})
+        const refreshToken = await this.generateRefreshToken({_id:user._id})
+        user.refreshToken=refreshToken
+        await user.save();
         return res.status(201).json({ status: 201, message: "Đăng nhập thành công", accessToken, refreshToken })
     }
     generateAccessToken(payload) {
-        const accessToken = JWT.sign({ payload }, ACCESS_TOKEN, { expiresIn: "2h" })
+        const accessToken = JWT.sign(payload, ACCESS_TOKEN, { expiresIn: "2h" })
         return accessToken
     }
     generateRefreshToken(payload) {
-        const refreshToken = JWT.sign({ payload }, REFRESH_TOKEN, { expiresIn: "7d" })
+        const refreshToken = JWT.sign(payload, REFRESH_TOKEN, { expiresIn: "7d" })
         return refreshToken
     }
 
@@ -177,6 +179,24 @@ class AuthRepository {
             if (error.name=="TokenExpiredError") {
                 return res.status(401).json({ status: 401, message: "Thời gian lấy lại mật khẩu đã hết hạn" })
             }
+        }
+    }
+
+    async refreshToken(req,res){
+        const{refreshToken}=req.body
+        try {
+            if (validator.isEmpty(refreshToken)) {
+                return res.status(401).json({status:401,message:"Chưa cung cấp mã token"})
+            }
+            const decode=JWT.verify(refreshToken,REFRESH_TOKEN)
+            const user=await UserModel.findOne({_id:decode._id,refreshToken:refreshToken})
+            if(!user){
+                return res.status(401).json({status:401,message:"Mã token không hợp lệ"})
+            }
+            const accessToken=await this.generateAccessToken({id:user._id})
+            return res.status(200).json({status:200,accessToken})
+        } catch (error) {
+            return res.status(500).json({status:500,message:error.message})
         }
     }
 }

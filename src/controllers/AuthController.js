@@ -18,5 +18,8 @@ class AuthController{
     async resetNewPassword(req,res){
         await AuthRepository.resetNewPassword(req,res)
     }
+    async refreshToken(req,res){
+        await AuthRepository.refreshToken(req,res)
+    }
 }
 module.exports=new AuthController()
