@@ -7,6 +7,6 @@ function Router(app){
     app.use("/category",categoryRouter)
     app.use("/auth",authRouter)
     app.use("/user",userRouter)
-    app.use("/service",authMiddleware,serviceRouter)
+    app.use("/service",serviceRouter)
 }
 module.exports=Router
