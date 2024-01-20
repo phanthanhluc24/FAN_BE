@@ -9,7 +9,7 @@ const ACCESS_TOKEN = process.env.ACCESS_TOKEN
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN
 const CODE_TOKEN_REFRESH = process.env.CODE_TOKEN_REFRESH
 const RESET_PASSWORD_TOKEN = process.env.RESET_PASSWORD_TOKEN
-const Mail = require("../utils/sendEmail")
+const Mail = require("../utils/sendOTP")
 class AuthRepository {
     async register(req, res) {
         const { full_name, email, number_phone, password, address, role, category_id } = req.body
