@@ -6,7 +6,8 @@ const ServiceSchema=new Schema({
     service_name:{type:String,require:true},
     price:{type:Number,require:true},
     image:{type:String,require:true},
-    desc:{type:String,require:true}
+    desc:{type:String,require:true},
+    status:{type:String,default:"active"}
 },{
     timestamps:true
 })
