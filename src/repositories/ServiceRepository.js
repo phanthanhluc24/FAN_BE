@@ -63,5 +63,17 @@ class ServiceRepository {
             console.log(error);
         }
     }
+
+    async getServices(req,res){
+        try {
+            const service=await ServiceModel.find({status:"active"})
+            if (service.length==0) {
+                return res.status(200).json({status:200,message:"Hiện tại chưa có dịch vụ nào được hoạt động",data:service})
+            }
+            return res.status(200).json({status:200,message:"Lấy dịch vụ hoạt động thành công",data:service})
+        } catch (error) {
+            return res.status(500).json(error)
+        }
+    }
 }
 module.exports = new ServiceRepository()
