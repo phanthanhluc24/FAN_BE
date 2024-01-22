@@ -33,11 +33,11 @@ class UserRepository {
         try {
             const allowedMimeTypes = ['image/png', 'image/jpeg'];
             if (!allowedMimeTypes.includes(file.mimetype)) {
-                return res.status(401).json({ status: 400, message: 'File ảnh không hợp lệ' });
+                return res.status(201).json({ status: 400, message: 'File ảnh không hợp lệ' });
             }
             const maxSizeBytes = 5 * 1024 * 1024; // 5 MB
             if (file.size > maxSizeBytes) {
-                return res.status(401).json({ status: 400, message: 'Dung lượng file quá lớn' });
+                return res.status(201).json({ status: 400, message: 'Dung lượng file quá lớn' });
             }
             const dateTime = giveCurrentDateTime();
             const storageRef = ref(storage, `avatar/${req.file.originalname + "" + dateTime}`);
