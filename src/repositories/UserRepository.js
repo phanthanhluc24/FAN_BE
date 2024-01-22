@@ -57,6 +57,19 @@ class UserRepository {
             return res.status(400).send(error.message)
         }
     }
+
+    async getRepairmanByCategory(req,res){
+        try {
+            const {id}=req.params
+            const repairmans=await UserModel.find({category_id:id,status:"active"})
+            if(repairmans.length<1){
+                return res.status(201).json({status:404,message:"Không tìm thấy thợ"})
+            }
+            return res.status(201).json({status:201,data:repairmans})
+        } catch (error) {
+            return res.status(500).json({status:500,message:"Không tìm thấy tham số id"})
+        }
+    }
 }
 
 module.exports = new UserRepository()
