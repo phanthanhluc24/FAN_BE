@@ -5,7 +5,7 @@ class CategoryRepository {
         const { name } = req.body
         try {
             if (validator.isEmpty(name)) {
-                return res.status(401).json({ status: 401, message: "Category name is required" })
+                return res.status(201).json({ status: 401, message: "Category name is required" })
             }
             const category = new CategoriesModel()
             category.name = name
