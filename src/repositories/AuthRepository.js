@@ -12,9 +12,9 @@ const RESET_PASSWORD_TOKEN = process.env.RESET_PASSWORD_TOKEN
 const Mail = require("../utils/sendOTP")
 class AuthRepository {
     async register(req, res) {
-        const { full_name, email, number_phone, password, address, role, category_id } = req.body
         try {
-            if (validator.isEmpty(full_name) || validator.isEmpty(email) || validator.isEmpty(number_phone) || validator.isEmpty(password)) {
+            const { full_name, email, number_phone, password, address, role, category_id } = req.body
+            if (validator.isEmpty(full_name) || validator.isEmpty(email) || validator.isEmpty(number_phone) || validator.isEmpty(password) || validator.isEmpty(role)) {
                 return res.status(201).json({ status: 401, message: "Tất cả các trường không được bỏ trống" })
             }
             if (!validator.isEmail(email)) {
@@ -53,7 +53,7 @@ class AuthRepository {
             const refreshCode = await JWT.sign({ _id: newUser._id }, CODE_TOKEN_REFRESH, { expiresIn: "1h" })
             return res.status(200).json({ status: 201, message: "Tạo tại khoản thành công", code: codeToken, refreshCode: refreshCode })
         } catch (error) {
-            return res.status(500).json({ status: 500, message: error })
+            return res.status(400).json({ status: 500, message: "Thiếu trường dữ liệu cần thiết" })
         }
 
     }
