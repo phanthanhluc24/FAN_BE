@@ -93,5 +93,18 @@ class ServiceRepository {
             console.error('Error in searchService:', error);
         }
     }
+
+    async getServiceById(req,res){
+        try {
+            const {id}=req.params
+            const service=await ServiceModel.findById(id).populate("user_id")
+            if(!service){
+                return res.status(201).json({status:404,message:"Dịch vụ không tìm thấy"})
+            }
+            return res.status(201).json({status:201,data:service})
+        } catch (error) {
+            return res.status(500).json({status:500,message:"Id dịch vụ không hợp lệ"})
+        }
+    }
 }
 module.exports = new ServiceRepository()

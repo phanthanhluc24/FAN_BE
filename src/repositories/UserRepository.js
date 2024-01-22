@@ -67,7 +67,7 @@ class UserRepository {
             }
             return res.status(201).json({status:201,data:repairmans})
         } catch (error) {
-            return res.status(500).json({status:500,message:"Không tìm thấy tham số id"})
+            return res.status(500).json({status:500,message:"Id danh mục thợ không hợp lệ"})
         }
     }
 }
