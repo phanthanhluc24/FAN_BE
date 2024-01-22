@@ -11,5 +11,9 @@ class UserController{
     async getRepairmanByService(req,res){
         await UserRepository.getRepairmanByCategory(req,res)
     }
+
+    async getRepairmanById(req,res){
+        await UserRepository.getRepairmanById(req,res)
+    }
 }
 module.exports=new UserController()
