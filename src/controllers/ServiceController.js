@@ -6,5 +6,8 @@ class ServiceController{
     async getServices(req,res){
         await ServiceRepository.getServices(req,res)
     }
+    async researchRepairman(req,res){
+        await ServiceRepository.researchService(req,res)
+    }
 }
 module.exports=new ServiceController()

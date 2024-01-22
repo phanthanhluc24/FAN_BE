@@ -75,5 +75,23 @@ class ServiceRepository {
             return res.status(500).json(error)
         }
     }
+
+    async researchService(req,res){
+        const {search}=req.body
+        try {
+            if(validator.isEmpty(search)){
+                return res.status(201).json({status:401,message:"Nội dung tìm kiếm không được rỗng"})
+            }
+            const services=await ServiceModel.find({
+                service_name: { $regex: search, $options: 'i' },
+                status: 'active'})
+            if(services.length<1){
+                return res.status(201).json({status:201,message:"Không tìm thấy kết quả"})
+            }
+                return res.status(201).json({status:201,data:services})
+        } catch (error) {
+            console.error('Error in searchService:', error);
+        }
+    }
 }
 module.exports = new ServiceRepository()
