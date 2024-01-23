@@ -6,7 +6,7 @@ const authMiddleware=require("../middlewares/AuthMiddleware")
 function Router(app){
     app.use("/category",categoryRouter)
     app.use("/auth",authRouter)
-    app.use("/user",userRouter)
+    app.use("/user",authMiddleware,userRouter)
     app.use("/service",authMiddleware,serviceRouter)
 }
 module.exports=Router
