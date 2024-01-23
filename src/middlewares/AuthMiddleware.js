@@ -5,7 +5,7 @@ const JWT=require("jsonwebtoken")
 const ACCESS_TOKEN=process.env.ACCESS_TOKEN
 function authMiddleware(req,res,next){
     const accessToken=req.headers.authorization
-    if (validator.isEmpty(accessToken)) {
+    if (!accessToken) {
         return res.status(401).json({status:401,message:"Chưa cung cấp mã token"})
     }
     const token=accessToken.split(" ")
