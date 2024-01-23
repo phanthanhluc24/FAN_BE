@@ -107,5 +107,31 @@ class ServiceRepository {
             return res.status(500).json({status:500,message:"Id dịch vụ không hợp lệ"})
         }
     }
+
+    async getServiceOfRepairmanSpecific(req,res){
+        try {
+            const {id}=req.params
+            const services=await ServiceModel.find({user_id:id})
+            if (services.length<1) {
+                return res.status(201).json({status:200,message:"Thợ này chưa có bất kỳ dịch vụ nào",data:services})
+            }
+            return res.status(201).json({status:201,data:services})
+        } catch (error) {
+            return res.status(500).json({status:500,message:"Tham số id không hợp lệ"})
+        }
+    }
+
+    async getServiceOfRepairmanCurrent(req,res){
+        try {
+            const userId=req.user._id
+            const services=await ServiceModel.find({userId})
+            if(services.length<1){
+                return res.status(201).json({status:200,message:"Bạn chưa có dịch vụ nào"})
+            }
+            return res.status(201).json({status:201,data:services})
+        } catch (error) {
+            return res.status(500).json({status:500,message:"Lỗi từ server"})
+        }
+    }
 }
 module.exports = new ServiceRepository()

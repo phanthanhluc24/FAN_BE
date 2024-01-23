@@ -12,5 +12,13 @@ class ServiceController{
     async getServiceById(req,res){
         await ServiceRepository.getServiceById(req,res)
     }
+
+    async getServiceOfRepairmanSpecific(req,res){
+        await ServiceRepository.getServiceOfRepairmanSpecific(req,res)
+    }
+    async getServiceOfRepairmanCurrent(req,res){
+        await ServiceRepository.getServiceOfRepairmanCurrent(req,res)
+    }
+    
 }
 module.exports=new ServiceController()

@@ -61,7 +61,7 @@ class UserRepository {
     async getRepairmanByCategory(req,res){
         try {
             const {id}=req.params
-            const repairmans=await UserModel.find({category_id:id,status:"active"})
+            const repairmans=await UserModel.find({category_id:id})
             if(repairmans.length<1){
                 return res.status(201).json({status:404,message:"Không tìm thấy thợ"})
             }
