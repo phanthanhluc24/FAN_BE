@@ -57,6 +57,32 @@ class UserRepository {
             return res.status(400).send(error.message)
         }
     }
+
+    async getRepairmanByCategory(req,res){
+        try {
+            const {id}=req.params
+            const repairmans=await UserModel.find({category_id:id,status:"active"})
+            if(repairmans.length<1){
+                return res.status(201).json({status:404,message:"Không tìm thấy thợ"})
+            }
+            return res.status(201).json({status:201,data:repairmans})
+        } catch (error) {
+            return res.status(500).json({status:500,message:"Id danh mục thợ không hợp lệ"})
+        }
+    }
+
+    async getRepairmanById(req,res){
+        try {
+            const {id}=req.params
+            const repairman=await UserModel.findById(id)
+            if(!repairman){
+                return res.status(201).json({status:404,message:"Không tìm thấy thợ"})
+            }
+            return res.status(201).json({status:201,data:repairman})
+        } catch (error) {
+            return res.status(500).json({status:500,message:"Id không hợp lệ"})
+        }
+    }
 }
 
 module.exports = new UserRepository()

@@ -7,5 +7,13 @@ class UserController{
     async uploadAvatar(req,res){
         await UserRepository.uploadAvatar(req,res)
     }
+
+    async getRepairmanByService(req,res){
+        await UserRepository.getRepairmanByCategory(req,res)
+    }
+
+    async getRepairmanById(req,res){
+        await UserRepository.getRepairmanById(req,res)
+    }
 }
 module.exports=new UserController()
