@@ -199,5 +199,18 @@ class AuthRepository {
             return res.status(500).json({status:500,message:error.message})
         }
     }
+
+    async getCurrentUser(req,res){
+        try {
+            const userId=req.user._id
+            const user=await UserModel.findById(userId).select("image full_name")
+            if (!user) {
+                return res.status(201).json({status:401,message:"Không tìm thấy người dùng"})
+            }
+            return res.status(201).json({status:201,data:user})
+        } catch (error) {
+            return res.status(500).json("Lỗi truyền tham số id")
+        }
+    }
 }
 module.exports = new AuthRepository()

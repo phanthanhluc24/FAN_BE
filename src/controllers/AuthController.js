@@ -21,5 +21,8 @@ class AuthController{
     async refreshToken(req,res){
         await AuthRepository.refreshToken(req,res)
     }
+    async getCurrentUser(req,res){
+        await AuthRepository.getCurrentUser(req,res)
+    }
 }
 module.exports=new AuthController()
