@@ -16,7 +16,8 @@ const giveCurrentDateTime = () => {
 }
 class ServiceRepository {
     async addService(req, res) {
-        const userId =req.user_id
+        const userId =req.user._id
+        console.log(userId);
         const { price, desc,service_name } = req.body
         const file = req.file;
         try {
