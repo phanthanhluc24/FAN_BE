@@ -1,6 +1,7 @@
 const express=require("express")
 const router=express.Router()
 const AuthController=require("../controllers/AuthController")
+const authMiddleware=require("../middlewares/AuthMiddleware")
 router.post("/register",AuthController.register)
 router.post("/verificationCode",AuthController.verificationCode)
 router.post("/reSendVerificationCode",AuthController.reSendVerificationCode)
@@ -8,4 +9,5 @@ router.post("/login",AuthController.login)
 router.post("/verificationAccount",AuthController.verificationAccount)
 router.post("/resetNewPassword",AuthController.resetNewPassword)
 router.post("/refreshToken",AuthController.refreshToken)
+router.get("/currentUser",authMiddleware,AuthController.getCurrentUser)
 module.exports=router
