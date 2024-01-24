@@ -39,7 +39,7 @@ class AuthRepository {
             }
             const hasPassword = await bcrypt.hash(password, 10)
             const user = new UserModel()
-            user.full_name = full_name
+            user.full_name = full_name.replace(/\b\w/g, match => match.toUpperCase())
             user.email = email
             user.number_phone = number_phone
             user.password = hasPassword
