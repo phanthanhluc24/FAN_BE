@@ -3,6 +3,7 @@ const { getStorage, ref, getDownloadURL, uploadBytesResumable } = require("fireb
 const { initializeApp } = require("firebase/app")
 const config = require("../configs/firebase.config")
 initializeApp(config.firebaseConfig)
+const CommentModel=require("../models/CommentModel")
 const storage = getStorage()
 const giveCurrentDateTime = () => {
     const today = new Date();
@@ -18,11 +19,21 @@ class UserRepository {
         const startIndex = (currentPage - 1) * pageSize
         const endIndex = currentPage * pageSize
         try {
-            const repairmans = await UserModel.find({ role: "RPM", status: "active" });
-            const paginatePage = repairmans.slice(startIndex, endIndex)
-            return res.json({ "status": 200, "data": paginatePage, "total": repairmans.length })
+            const repairmen = await UserModel.find({ role: "RPM",status:"active" });
+            const averageStars = await Promise.all(
+                repairmen.map(async (repairman) => {
+                    const comments = await CommentModel.find({ receiver_id: repairman._id });
+                    if (comments.length > 0) {
+                        const totalStars = comments.reduce((acc, comment) => acc + comment.star, 0);
+                        return { _id: repairman._id,full_name:repairman.full_name,avatar:repairman.image, averageStar: totalStars / comments.length };
+                    } else {
+                        return { _id: repairman._id,full_name:repairman.full_name,avatar:repairman.image, averageStar: 0 };
+                    }
+                })
+            );
+            const paginatePage = averageStars.slice(startIndex, endIndex)
+            return res.json({ "status": 200, "data": paginatePage, "total": averageStars.length });
         } catch (error) {
-            console.log(error);
             return res.status(500).json(error)
         }
     }
@@ -58,29 +69,29 @@ class UserRepository {
         }
     }
 
-    async getRepairmanByCategory(req,res){
+    async getRepairmanByCategory(req, res) {
         try {
-            const {id}=req.params
-            const repairmans=await UserModel.find({category_id:id})
-            if(repairmans.length<1){
-                return res.status(201).json({status:404,message:"Không tìm thấy thợ"})
+            const { id } = req.params
+            const repairmans = await UserModel.find({ category_id: id })
+            if (repairmans.length < 1) {
+                return res.status(201).json({ status: 404, message: "Không tìm thấy thợ" })
             }
-            return res.status(201).json({status:201,data:repairmans})
+            return res.status(201).json({ status: 201, data: repairmans })
         } catch (error) {
-            return res.status(500).json({status:500,message:"Id danh mục thợ không hợp lệ"})
+            return res.status(500).json({ status: 500, message: "Id danh mục thợ không hợp lệ" })
         }
     }
 
-    async getRepairmanById(req,res){
+    async getRepairmanById(req, res) {
         try {
-            const {id}=req.params
-            const repairman=await UserModel.findById(id)
-            if(!repairman){
-                return res.status(201).json({status:404,message:"Không tìm thấy thợ"})
+            const { id } = req.params
+            const repairman = await UserModel.findById(id)
+            if (!repairman) {
+                return res.status(201).json({ status: 404, message: "Không tìm thấy thợ" })
             }
-            return res.status(201).json({status:201,data:repairman})
+            return res.status(201).json({ status: 201, data: repairman })
         } catch (error) {
-            return res.status(500).json({status:500,message:"Id không hợp lệ"})
+            return res.status(500).json({ status: 500, message: "Id không hợp lệ" })
         }
     }
 }
