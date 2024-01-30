@@ -10,4 +10,5 @@ router.post("/verificationAccount",AuthController.verificationAccount)
 router.post("/resetNewPassword",AuthController.resetNewPassword)
 router.post("/refreshToken",AuthController.refreshToken)
 router.get("/currentUser",authMiddleware,AuthController.getCurrentUser)
+router.post("/logout",authMiddleware,AuthController.logout)
 module.exports=router
