@@ -219,5 +219,21 @@ class AuthRepository {
             return res.status(500).json("Lỗi truyền tham số id")
         }
     }
+
+    async logout(req,res){
+        try {
+            const userId=req.user._id
+            const user=await UserModel.findById(userId)
+            if (!user) {
+                return res.status(201).json({status:404,message:"User not found"})
+            }
+            user.refreshToken=""
+            await user.save()
+            return res.status(201).json({status:201,message:"Log out successfully"})
+        } catch (error) {
+            return res.status(500).json({status:500,message:error.message})
+        }
+
+    }
 }
 module.exports = new AuthRepository()
