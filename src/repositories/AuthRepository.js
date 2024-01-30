@@ -105,14 +105,14 @@ class AuthRepository {
     async login(req, res) {
         const { email, password } = req.body
         if (validator.isEmpty(email) || validator.isEmpty(password)) {
-            return res.status(201).json({ status: 401, message: "Email và mật khẩu không được bỏ trống" })
+            return res.status(201).json({ status: 400, message: "Email và mật khẩu không được bỏ trống" })
         }
         if (!validator.isEmail(email)) {
-            return res.status(201).json({ status: 401, message: "Email không hợp lệ" })
+            return res.status(201).json({ status: 400, message: "Email không hợp lệ" })
         }
         const user = await UserModel.findOne({ email: email, status: "active" })
         if (!user) {
-            return res.status(201).json({ status: 401, message: "Không tìm thấy tài khoản" })
+            return res.status(201).json({ status: 404, message: "Không tìm thấy tài khoản" })
         }
         const comparePassword = await bcrypt.compare(password, user.password)
         if (!comparePassword) {
