@@ -24,5 +24,8 @@ class AuthController{
     async getCurrentUser(req,res){
         await AuthRepository.getCurrentUser(req,res)
     }
+    async logout(req,res){
+        await AuthRepository.logout(req,res)
+    }
 }
 module.exports=new AuthController()

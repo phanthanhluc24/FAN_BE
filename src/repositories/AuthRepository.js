@@ -10,18 +10,19 @@ const REFRESH_TOKEN = process.env.REFRESH_TOKEN
 const CODE_TOKEN_REFRESH = process.env.CODE_TOKEN_REFRESH
 const RESET_PASSWORD_TOKEN = process.env.RESET_PASSWORD_TOKEN
 const Mail = require("../utils/sendOTP")
+const CategoryModel=require("../models/CategoriesModel")
 class AuthRepository {
     async register(req, res) {
         try {
             const { full_name, email, number_phone, password, address, role, category_id } = req.body
             if (validator.isEmpty(full_name) || validator.isEmpty(email) || validator.isEmpty(number_phone) || validator.isEmpty(password) || validator.isEmpty(role)) {
-                return res.status(201).json({ status: 401, message: "Tất cả các trường không được bỏ trống" })
+                return res.status(201).json({ status: 400, message: "Tất cả các trường không được bỏ trống" })
             }
             if (!validator.isEmail(email)) {
-                return res.status(201).json({ status: 401, message: "Email đăng ký không lệ" })
+                return res.status(201).json({ status: 400, message: "Email đăng ký không lệ" })
             }
             if (!validator.isMobilePhone(number_phone, "vi-VN")) {
-                return res.status(201).json({ status: 401, message: "Số điện thoại không hợp lệ" })
+                return res.status(201).json({ status: 400, message: "Số điện thoại không hợp lệ" })
             }
             const exitAccount = await UserModel.findOne({ $or: [{ email: email }, { number_phone: number_phone }] })
             if (exitAccount) {
@@ -38,6 +39,12 @@ class AuthRepository {
                 return res.status(201).json({ status: 401, message: "Mật khẩu quá yếu" })
             }
             const hasPassword = await bcrypt.hash(password, 10)
+            if(role=="RPM"){
+                const checkCategory=await CategoryModel.findById(category_id)
+                if(!checkCategory){
+                    return res.status(201).json({status:404,message:"Category not found"})
+                }
+            }
             const user = new UserModel()
             user.full_name = full_name.replace(/\b\w/g, match => match.toUpperCase())
             user.email = email
@@ -105,14 +112,14 @@ class AuthRepository {
     async login(req, res) {
         const { email, password } = req.body
         if (validator.isEmpty(email) || validator.isEmpty(password)) {
-            return res.status(201).json({ status: 401, message: "Email và mật khẩu không được bỏ trống" })
+            return res.status(201).json({ status: 400, message: "Email và mật khẩu không được bỏ trống" })
         }
         if (!validator.isEmail(email)) {
-            return res.status(201).json({ status: 401, message: "Email không hợp lệ" })
+            return res.status(201).json({ status: 400, message: "Email không hợp lệ" })
         }
         const user = await UserModel.findOne({ email: email, status: "active" })
         if (!user) {
-            return res.status(201).json({ status: 401, message: "Không tìm thấy tài khoản" })
+            return res.status(201).json({ status: 404, message: "Không tìm thấy tài khoản" })
         }
         const comparePassword = await bcrypt.compare(password, user.password)
         if (!comparePassword) {
@@ -211,6 +218,22 @@ class AuthRepository {
         } catch (error) {
             return res.status(500).json("Lỗi truyền tham số id")
         }
+    }
+
+    async logout(req,res){
+        try {
+            const userId=req.user._id
+            const user=await UserModel.findById(userId)
+            if (!user) {
+                return res.status(201).json({status:404,message:"User not found"})
+            }
+            user.refreshToken=""
+            await user.save()
+            return res.status(201).json({status:201,message:"Log out successfully"})
+        } catch (error) {
+            return res.status(500).json({status:500,message:error.message})
+        }
+
     }
 }
 module.exports = new AuthRepository()

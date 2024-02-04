@@ -85,12 +85,13 @@ class UserRepository {
     async getRepairmanById(req, res) {
         try {
             const { id } = req.params
-            const repairman = await UserModel.findById(id)
+            const repairman = await UserModel.findById(id).populate("category_id")
             if (!repairman) {
                 return res.status(201).json({ status: 404, message: "Không tìm thấy thợ" })
             }
             return res.status(201).json({ status: 201, data: repairman })
         } catch (error) {
+            console.log(error)
             return res.status(500).json({ status: 500, message: "Id không hợp lệ" })
         }
     }

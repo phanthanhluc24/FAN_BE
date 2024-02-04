@@ -12,7 +12,6 @@ class ServiceController{
     async getServiceById(req,res){
         await ServiceRepository.getServiceById(req,res)
     }
-
     async getServiceOfRepairmanSpecific(req,res){
         await ServiceRepository.getServiceOfRepairmanSpecific(req,res)
     }
