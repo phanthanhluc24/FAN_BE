@@ -124,7 +124,7 @@ class ServiceRepository {
     async getServiceOfRepairmanCurrent(req,res){
         try {
             const userId=req.user._id
-            const services=await ServiceModel.find({userId})
+            const services=await ServiceModel.find({user_id:userId})
             if(services.length<1){
                 return res.status(201).json({status:200,message:"Bạn chưa có dịch vụ nào"})
             }
