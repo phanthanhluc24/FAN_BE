@@ -76,7 +76,18 @@ class UserRepository {
             if (repairmans.length < 1) {
                 return res.status(201).json({ status: 404, message: "Không tìm thấy thợ" })
             }
-            return res.status(201).json({ status: 201, data: repairmans })
+            const averageStar=await Promise.all(
+                repairmans.map(async (repairman)=>{
+                    const comments =await CommentModel.find({receiver_id:repairman._id});
+                    if (comments.length > 0) {
+                        const totalStars = comments.reduce((acc, comment) => acc + comment.star, 0);
+                        return { _id: repairman._id,full_name:repairman.full_name,avatar:repairman.image, averageStar: totalStars / comments.length };
+                    } else {
+                        return { _id: repairman._id,full_name:repairman.full_name,avatar:repairman.image, averageStar: 0 };
+                    }
+                })
+            )
+            return res.status(201).json({ status: 201, data: averageStar })
         } catch (error) {
             return res.status(500).json({ status: 500, message: "Id danh mục thợ không hợp lệ" })
         }
