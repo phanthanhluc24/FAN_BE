@@ -6,6 +6,6 @@ const upload =multer({storage:multer.memoryStorage()})
 const authMiddleware=require("../middlewares/AuthMiddleware")
 router.get("/repairmans/:currentPage",UserController.getRepairmans)
 router.post("/uploadImage",authMiddleware,upload.single("image"),UserController.uploadAvatar)
-router.get("/repairmanByCategory/:id",UserController.getRepairmanByService)
+router.get("/repairmanByCategory/:id",UserController.getRepairmanByCategory)
 router.get("/repairman/:id",UserController.getRepairmanById)
 module.exports=router
