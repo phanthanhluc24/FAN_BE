@@ -210,7 +210,7 @@ class AuthRepository {
     async getCurrentUser(req,res){
         try {
             const userId=req.user._id
-            const user=await UserModel.findById(userId).select("image full_name")
+            const user=await UserModel.findById(userId)
             if (!user) {
                 return res.status(201).json({status:401,message:"Không tìm thấy người dùng"})
             }
