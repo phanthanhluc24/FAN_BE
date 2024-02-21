@@ -9,4 +9,5 @@ router.get("/",ServiceController.getServices)
 router.get("/:id",ServiceController.getServiceById)
 router.get("/repairman/detail/:id",ServiceController.getServiceOfRepairmanSpecific)
 router.get("/repairman/current",ServiceController.getServiceOfRepairmanCurrent)
+router.get("/relatedByCategory/:service_id",ServiceController.getServiceRelateByCategory)
 module.exports=router

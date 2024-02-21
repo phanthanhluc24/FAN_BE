@@ -8,7 +8,7 @@ class UserController{
         await UserRepository.uploadAvatar(req,res)
     }
 
-    async getRepairmanByService(req,res){
+    async getRepairmanByCategory(req,res){
         await UserRepository.getRepairmanByCategory(req,res)
     }
 
