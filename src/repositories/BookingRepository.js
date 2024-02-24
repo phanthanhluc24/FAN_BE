@@ -1,5 +1,5 @@
 const BookingModel=require("../models/BookingModel")
-
+const admin=require("firebase-admin")
 class BookingRepository{
     async bookingService(){}
     async checkBooking(req,res){
@@ -14,6 +14,24 @@ class BookingRepository{
         } catch (error) {
             return res.status(500).json({ status: 500, success: false, message: "Internal Server Error." });
         }
+    }
+    async sendNotificationBookingService(){
+        BookingModel.watch().on("change",(change)=>{
+            if (change.type==="insert") {
+                const bookingData=change.fullDocument
+                const message = {
+                    notification: {
+                      title: 'Booking mới',
+                      body: `Booking cho dịch vụ ${bookingData.service_name} đã được tạo.`
+                    },
+                    data: {
+                      bookingId: bookingData._id
+                    },
+                    topic: 'bookings'
+                  };
+                  admin.messaging().send(message)
+            }
+        })
     }
 }
 module.exports=new BookingRepository()
