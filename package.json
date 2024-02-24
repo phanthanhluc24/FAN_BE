@@ -10,6 +10,7 @@
   "author": "Phan Thanh Luc",
   "license": "ISC",
   "dependencies": {
+    "@google/generative-ai": "^0.2.1",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -23,6 +24,7 @@
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.8",
     "nodemon": "^3.0.2",
+    "openai": "^4.28.0",
     "supertest": "^6.3.4",
     "twilio": "^5.0.0-rc.1",
     "validator": "^13.11.0"

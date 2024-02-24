@@ -132,7 +132,7 @@ class AuthRepository {
         return res.status(201).json({ status: 201, message: "Đăng nhập thành công", accessToken, refreshToken })
     }
     generateAccessToken(payload) {
-        const accessToken = JWT.sign(payload, ACCESS_TOKEN, { expiresIn: "2h" })
+        const accessToken = JWT.sign(payload, ACCESS_TOKEN, { expiresIn: "7d" })
         return accessToken
     }
     generateRefreshToken(payload) {
