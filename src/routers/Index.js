@@ -13,6 +13,6 @@ function Router(app){
     app.use("/service",authMiddleware,serviceRouter)
     app.use("/comment",authMiddleware,commentRouter)
     app.use("/booking",authMiddleware,bookingRouter)
-    app.use("/chatGPT",authMiddleware,apRouter)
+    app.use("/chatGPT",apRouter)
 }
 module.exports=Router

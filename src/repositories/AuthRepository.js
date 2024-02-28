@@ -24,7 +24,7 @@ class AuthRepository {
             if (!validator.isMobilePhone(number_phone, "vi-VN")) {
                 return res.status(201).json({ status: 400, message: "Số điện thoại không hợp lệ" })
             }
-            const exitAccount = await UserModel.findOne({ $or: [{ email: email }, { number_phone: number_phone }] })
+            const exitAccount = await UserModel.findOne({ $or: [{ email: email }, { number_phone: number_phone }],$ne:{status:"inactive"} })
             if (exitAccount) {
                 return res.status(201).json({ status: 409, message: "Email hoặc số điện thoại đã được đăng ký" })
             }
@@ -110,7 +110,7 @@ class AuthRepository {
     }
 
     async login(req, res) {
-        const { email, password } = req.body
+        const { email, password, deviceToken } = req.body
         if (validator.isEmpty(email) || validator.isEmpty(password)) {
             return res.status(201).json({ status: 400, message: "Email và mật khẩu không được bỏ trống" })
         }
@@ -128,6 +128,7 @@ class AuthRepository {
         const accessToken = await this.generateAccessToken({_id:user._id})
         const refreshToken = await this.generateRefreshToken({_id:user._id})
         user.refreshToken=refreshToken
+        user.deviceToken=deviceToken
         await user.save();
         return res.status(201).json({ status: 201, message: "Đăng nhập thành công", accessToken, refreshToken })
     }
@@ -200,7 +201,7 @@ class AuthRepository {
             if(!user){
                 return res.status(201).json({status:401,message:"Mã token không hợp lệ"})
             }
-            const accessToken=await this.generateAccessToken({id:user._id})
+            const accessToken=await this.generateAccessToken({_id:user._id})
             return res.status(200).json({status:200,accessToken})
         } catch (error) {
             return res.status(500).json({status:500,message:error.message})
