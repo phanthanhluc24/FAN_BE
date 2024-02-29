@@ -5,7 +5,7 @@ class BookingController{
     }
 
     async notificationToClient(req,res){
-        await AskAndAnswerRepository.sendNotificationToClient(req,res)
+        await BookingRepository.sendNotificationToClient(req,res)
     }
 }
 module.exports=new BookingController()
