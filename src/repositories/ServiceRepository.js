@@ -47,6 +47,7 @@ class ServiceRepository {
             // Grab the public url
             const user = await UserModel.findById(userId)
             const downloadURL = await getDownloadURL(snapshot.ref);
+            console.log(downloadURL);
             const service = new ServiceModel()
             service.user_id = userId,
                 service.service_name = service_name,

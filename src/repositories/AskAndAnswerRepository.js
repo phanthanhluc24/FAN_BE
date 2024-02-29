@@ -1,11 +1,8 @@
 const dotenv = require("dotenv");
 dotenv.config();
-// const GeminiClient = require("gemini-client");
-// const client = new GeminiClient({
-//   apiKey: process.env.OPENAI_KEY,
-// });
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.OPENAI_KEY);
+
 let questionsAndAnswers=[]
 class AskAndAnswerRepository{
   async aiResponse(req , res) {
@@ -21,6 +18,8 @@ class AskAndAnswerRepository{
       console.log(error);
     }
   }
+
+  
 }
 
 module.exports=new AskAndAnswerRepository()
