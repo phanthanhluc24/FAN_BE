@@ -48,8 +48,11 @@ class BookingRepository{
           if (repairman_id==userId) {
             return res.status(200).json({status:401,message:"Bạn không thể tự đặt dịch vụ của mình"})
           }
-          const  notification= await this.saveNotification(service.service_name,service_id,repairman_id,userId)
-          await this.bookingService(address,priceTransport,priceService,userId,service_id,desc)
+          const booking= await this.bookingService(address,priceTransport,priceService,userId,service_id,desc)
+          if (!booking) {
+            return res.status(200).json({status:400,message:"Đặt dịch vụ không thành công"})
+          }
+          const  notification= await this.saveNotification(service.service_name,service_id,repairman_id,userId,booking._id)
           if (!notification) {
             return res.status(200).json({status:400,message:"Đặt dịch vụ không thành công"})
           }
@@ -62,7 +65,7 @@ class BookingRepository{
         }
     }
 
-    async saveNotification(service_name,service_id,repairman_id,userId){
+    async saveNotification(service_name,service_id,repairman_id,userId,booking_id){
       try {
         const notification=new NotificationModel()
         notification.titleRepairman="Bạn nhận được đơn sửa chửa"
@@ -72,6 +75,7 @@ class BookingRepository{
         notification.service_id=service_id
         notification.repairman_id=repairman_id
         notification.user_id=userId
+        notification.booking_id=booking_id
         await notification.save()
         return notification
       } catch (error) {
@@ -88,6 +92,7 @@ class BookingRepository{
       booking.fee_transport=priceTransport
       booking.desc=desc
       await booking.save()
+      return booking
   }
 }
 module.exports=new BookingRepository()
