@@ -8,4 +8,5 @@ router.get("/repairmans/:currentPage",UserController.getRepairmans)
 router.post("/uploadImage",authMiddleware,upload.single("image"),UserController.uploadAvatar)
 router.get("/repairmanByCategory/:id",UserController.getRepairmanByCategory)
 router.get("/repairman/:id",UserController.getRepairmanById)
+router.put("/editInformation",UserController.editInformation)
 module.exports=router
