@@ -5,6 +5,7 @@ const config = require("../configs/firebase.config")
 initializeApp(config.firebaseConfig)
 const CommentModel=require("../models/CommentModel")
 const storage = getStorage()
+const validator=require("validator")
 const giveCurrentDateTime = () => {
     const today = new Date();
     const date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
@@ -104,6 +105,44 @@ class UserRepository {
         } catch (error) {
             console.log(error)
             return res.status(500).json({ status: 500, message: "Id không hợp lệ" })
+        }
+    }
+
+    async editInformation(req,res){
+        try {
+            const userId=req.user._id
+            const {full_name,number_phone}=req.body
+            console.log(number_phone)
+            if (validator.isEmpty(full_name)) {
+                return res.status(201).json({ status: 400, message: "Họ tên không được bỏ trống" })
+            }
+            if (validator.isEmpty(number_phone)) {
+                return res.status(201).json({ status: 400, message: "Số điện thoại không được bỏ trống" })
+            }
+            if (!validator.isMobilePhone(number_phone, "vi-VN")) {
+                return res.status(201).json({ status: 400, message: "Số điện thoại không hợp lệ" })
+            }
+            const exitAccount = await UserModel.findOne({
+                number_phone: number_phone,
+                $and: [
+                  { status: { $ne: "inactive" } },
+                  { _id: { $ne: userId } }
+                ]
+              });
+              
+            if (exitAccount) {
+                return res.status(201).json({ status: 409, message: "Số điện thoại đã tồn tại" })
+            }
+            const user=await UserModel.findById({_id:userId})
+            if (!user) {
+                return res.status(200).json({status:404,message:"Không tìm thấy người dùng"})
+            }
+            user.full_name=full_name
+            user.number_phone=number_phone
+            await user.save()
+            return res.status(200).json({status:200,message:"Cập nhật thông tin thành công"})
+        } catch (error) {
+            return res.status(201).json({ status: 500, message: error.message })
         }
     }
 }
