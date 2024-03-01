@@ -7,6 +7,7 @@ const ServiceModel = require("../models/ServiceModel")
 const validator = require("validator")
 const UserModel = require("../models/UserModel")
 const Mail = require("../utils/sendNotificationService")
+const unidecode=require("unidecode")
 const giveCurrentDateTime = () => {
     const today = new Date();
     const date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
@@ -84,10 +85,22 @@ class ServiceRepository {
             if (validator.isEmpty(search)) {
                 return res.status(201).json({ status: 401, message: "Nội dung tìm kiếm không được rỗng" })
             }
-            const services = await ServiceModel.find({
-                service_name: { $regex: search, $options: 'i' },
-                status: 'active'
-            })
+
+            const services = await ServiceModel.aggregate(
+                [
+                    {
+                      $search: {
+                        index: "text",
+                        text: {
+                          query: search,
+                          path: {
+                            wildcard: "*"
+                          }
+                        }
+                      }
+                    }
+                  ]
+            )
             if (services.length < 1) {
                 return res.status(201).json({ status: 201, message: "Không tìm thấy kết quả" })
             }
