@@ -23,5 +23,8 @@ class ServiceController{
         await ServiceRepository.getServiceRelateByCategory(req,res)
     }
     
+    async editServiceOfRepairman(req,res){
+        await ServiceRepository.editServiceOfRepairman(req,res)
+    }
 }
 module.exports=new ServiceController()
