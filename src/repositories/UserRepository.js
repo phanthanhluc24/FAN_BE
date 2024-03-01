@@ -43,7 +43,10 @@ class UserRepository {
         const userId = req.user._id
         const file = req.file;
         try {
-            const allowedMimeTypes = ['image/png', 'image/jpeg'];
+            if (file===undefined) {
+                return res.status(201).json({ status: 400, message: 'Ảnh không được rỗng'});
+            }
+            const allowedMimeTypes = ['image/png', 'image/jpeg',"image/jpg"];
             if (!allowedMimeTypes.includes(file.mimetype)) {
                 return res.status(201).json({ status: 400, message: 'File ảnh không hợp lệ' });
             }
@@ -112,11 +115,10 @@ class UserRepository {
         try {
             const userId=req.user._id
             const {full_name,number_phone}=req.body
-            console.log(number_phone)
-            if (validator.isEmpty(full_name)) {
+            if (validator.isEmpty(full_name)||full_name.trim().length===0) {
                 return res.status(201).json({ status: 400, message: "Họ tên không được bỏ trống" })
             }
-            if (validator.isEmpty(number_phone)) {
+            if (validator.isEmpty(number_phone)||number_phone.trim().length===0) {
                 return res.status(201).json({ status: 400, message: "Số điện thoại không được bỏ trống" })
             }
             if (!validator.isMobilePhone(number_phone, "vi-VN")) {

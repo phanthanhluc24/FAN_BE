@@ -15,7 +15,9 @@ class AuthRepository {
     async register(req, res) {
         try {
             const { full_name, email, number_phone, password, address, role, category_id } = req.body
-            if (validator.isEmpty(full_name) || validator.isEmpty(email) || validator.isEmpty(number_phone) || validator.isEmpty(password) || validator.isEmpty(role)) {
+            if (validator.isEmpty(full_name) || validator.isEmpty(email) || validator.isEmpty(number_phone) || validator.isEmpty(password) || validator.isEmpty(role)
+                ||full_name.trim().length===0 ||email.trim().length===0 ||number_phone.trim().length===0 || validator.isEmpty(role)
+            ) {
                 return res.status(201).json({ status: 400, message: "Tất cả các trường không được bỏ trống" })
             }
             if (!validator.isEmail(email)) {
@@ -24,8 +26,8 @@ class AuthRepository {
             if (!validator.isMobilePhone(number_phone, "vi-VN")) {
                 return res.status(201).json({ status: 400, message: "Số điện thoại không hợp lệ" })
             }
-            const exitAccount = await UserModel.findOne({ $or: [{ email: email }, { number_phone: number_phone }],$ne:{status:"inactive"} })
-            if (exitAccount) {
+            const exitAccount = await UserModel.findOne({$or: [{ email: email }, { number_phone: number_phone }],status: { $ne: "inactive" }});
+            if (!exitAccount) {
                 return res.status(201).json({ status: 409, message: "Email hoặc số điện thoại đã được đăng ký" })
             }
             const options = {
@@ -60,7 +62,7 @@ class AuthRepository {
             const refreshCode = await JWT.sign({ _id: newUser._id }, CODE_TOKEN_REFRESH, { expiresIn: "1h" })
             return res.status(200).json({ status: 201, message: "Tạo tại khoản thành công", code: codeToken, refreshCode: refreshCode })
         } catch (error) {
-            return res.status(400).json({ status: 500, message: "Thiếu trường dữ liệu cần thiết" })
+            return res.status(400).json({ status: 500, message: error.message })
         }
 
     }

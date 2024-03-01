@@ -10,4 +10,5 @@ router.get("/:id",ServiceController.getServiceById)
 router.get("/repairman/detail/:id",ServiceController.getServiceOfRepairmanSpecific)
 router.get("/repairman/current",ServiceController.getServiceOfRepairmanCurrent)
 router.get("/relatedByCategory/:service_id",ServiceController.getServiceRelateByCategory)
+router.put("/editService/:id",upload.single("image"),ServiceController.editServiceOfRepairman)
 module.exports=router

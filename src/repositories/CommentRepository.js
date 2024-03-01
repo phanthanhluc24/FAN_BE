@@ -5,10 +5,10 @@ class CommentRepository {
         try {
             const commenter_id = req.user._id
             const { receiver_id, content, star } = req.body
-            if (validator.isEmpty(content)) {
+            if (validator.isEmpty(content)||content.trim().length===0) {
                 return res.status(201).json({ status: 400, message: "Nội dung comment không được bỏ trống" })
             }
-            if (validator.isEmpty(star)) {
+            if (validator.isEmpty(star)||star.trim().length===0) {
                 return res.status(201).json({ status: 400, message: "Sao đánh giá không được trống" })
             }
             const comment = new CommentModel()

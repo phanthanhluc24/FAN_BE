@@ -27,7 +27,7 @@ class BookingRepository{
         const service_id=req.params.service_id
         const repairman_id=req.params.repairman_id
         const userId=req.user._id
-        if (validator.isEmpty(address) || validator.isEmpty(desc)) {
+        if (validator.isEmpty(address) || validator.isEmpty(desc) ||address.trim().length===0 ||desc.trim().length===0) {
           return res.status(200).json({status:400,message:"Đặt dịch vụ không thành công"})
         }
         const userDeviceId=await UserModel.findById({_id:repairman_id}).select("-_id deviceToken")
@@ -39,7 +39,6 @@ class BookingRepository{
           },
           data:{
             serviceId:service_id,
-            role:"RPM",
             image:service.image,
             day:dayRepair,
             time:timeRepair

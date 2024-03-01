@@ -17,18 +17,23 @@ const giveCurrentDateTime = () => {
 }
 class ServiceRepository {
     async addService(req, res) {
-        const userId = req.user._id
-        console.log(userId);
+        const userId = req.user._id;
         const { price, desc, service_name } = req.body
         const file = req.file;
         try {
-            if (!validator.isNumeric(price)) {
-                return res.status(201).json({ status: 401, message: "Giá tiền không hợp lệ" })
+            if (!validator.isNumeric(price)||price.trim().length===0) {
+                return res.status(201).json({ status: 400, message: "Giá tiền không hợp lệ" })
             }
-            if (validator.isEmpty(desc) || validator.isEmpty(service_name)) {
-                return res.status(201).json({ status: 401, message: "Mô tả và tên dịch vụ không được rỗng" })
+            if(validator.isEmpty(service_name)||service_name.trim().length===0){
+                return res.status(201).json({ status: 400, message: "Tên dịch vụ không được rỗng" })
             }
-            const allowedMimeTypes = ['image/png', 'image/jpeg'];
+            if (validator.isEmpty(desc)||desc.trim().length===0) {
+                return res.status(201).json({ status: 400, message: "Mô tả dịch vụ không được rỗng" })
+            }
+            if (file===undefined) {
+                return res.status(201).json({ status: 400, message: 'Ảnh không được rỗng'});
+            }
+            const allowedMimeTypes = ['image/png', 'image/jpeg',"image/jpg"];
             if (!allowedMimeTypes.includes(file.mimetype)) {
                 return res.status(201).json({ status: 400, message: 'File ảnh không hợp lệ' });
             }
@@ -48,11 +53,10 @@ class ServiceRepository {
             // Grab the public url
             const user = await UserModel.findById(userId)
             const downloadURL = await getDownloadURL(snapshot.ref);
-            console.log(downloadURL);
             const service = new ServiceModel()
             service.user_id = userId,
-                service.service_name = service_name,
-                service.price = price
+            service.service_name = service_name,
+            service.price = price
             service.image = downloadURL
             service.desc = desc
             await service.save()
@@ -82,7 +86,7 @@ class ServiceRepository {
     async researchService(req, res) {
         const { search } = req.body
         try {
-            if (validator.isEmpty(search)) {
+            if (validator.isEmpty(search)|| search.trim().length===0) {
                 return res.status(201).json({ status: 401, message: "Nội dung tìm kiếm không được rỗng" })
             }
 
@@ -171,6 +175,65 @@ class ServiceRepository {
             return res.status(201).json({status:201,data:relatedServices})
         } catch (error) {
             return res.status(500).json({ status: 500, message: "Tham số id không hợp lệ" })
+        }
+
+    }
+
+    async editServiceOfRepairman(req,res){
+        try {
+            const {service_name,price,desc}=req.body
+            const file=req.file
+            const service_id=req.params.id
+            const userId=req.user._id
+            if (!validator.isNumeric(price)||price.trim().length===0) {
+                return res.status(201).json({ status: 400, message: "Giá tiền không hợp lệ" })
+            }
+            if(validator.isEmpty(service_name)||service_name.trim().length===0){
+                return res.status(201).json({ status: 400, message: "Tên dịch vụ không được rỗng" })
+            }
+            if (validator.isEmpty(desc)||desc.trim().length===0) {
+                return res.status(201).json({ status: 400, message: "Mô tả dịch vụ không được rỗng" })
+            }
+            const service=await ServiceModel.findById({_id:service_id})
+            if (!service) {
+                return res.status(200).json({status:400,message:"Không tìm thấy dịch vụ"})
+            }
+            const checkService=await ServiceModel.findOne({_id:service_id,user_id:userId})
+            if (!checkService) {
+                return res.status(200).json({status:403,message:"Bạn không có quyền sửa dịch vụ này"})
+            }
+            if (file===undefined) {
+                service.service_name=service_name
+                service.price=price
+                service.desc=desc
+                await service.save()
+                return res.status(200).json({status:200,message:"Cập nhật dịch vụ thành công"})
+            }
+            const allowedMimeTypes = ['image/png', 'image/jpeg',"image/jpg"];
+            if (!allowedMimeTypes.includes(file.mimetype)) {
+                return res.status(201).json({ status: 400, message: 'File ảnh không hợp lệ' });
+            }
+            const maxSizeBytes = 5 * 1024 * 1024; // 5 MB
+            if (file.size > maxSizeBytes) {
+                return res.status(201).json({ status: 400, message: 'Dung lượng file quá lớn' });
+            }
+            const dateTime = giveCurrentDateTime();
+            const storageRef = ref(storage, `service/${req.file.originalname + "" + dateTime}`);
+            // Create file metadata including the content type
+            const metadata = {
+                contentType: req.file.mimetype,
+            };
+            // Upload the file in the bucket storage
+            const snapshot = await uploadBytesResumable(storageRef, req.file.buffer, metadata);
+            const downloadURL = await getDownloadURL(snapshot.ref);
+            service.service_name=service_name
+            service.price=price
+            service.desc=desc
+            service.image=downloadURL
+            await service.save()
+            return res.status(200).json({status:200,message:"Cập nhật dịch vụ thành công"})
+        } catch (error) {
+            return res.status(500).json({status:500,message:error.message})
         }
 
     }
