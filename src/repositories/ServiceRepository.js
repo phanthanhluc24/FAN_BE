@@ -198,9 +198,9 @@ class ServiceRepository {
             if (!service) {
                 return res.status(200).json({status:400,message:"Không tìm thấy dịch vụ"})
             }
-            const checkService=await ServiceModel.findOne({_id:service_id,user_id:userId})
+            const checkService=await ServiceModel.findOne({_id:service_id,user_id:userId,status:"active"})
             if (!checkService) {
-                return res.status(200).json({status:403,message:"Bạn không có quyền sửa dịch vụ này"})
+                return res.status(200).json({status:400,message:"Không tìm thấy dịch vụ"})
             }
             if (file===undefined) {
                 service.service_name=service_name
@@ -236,6 +236,22 @@ class ServiceRepository {
             return res.status(500).json({status:500,message:error.message})
         }
 
+    }
+
+    async destroyServiceOfRepairman(req,res){
+        try {
+            const service_id=req.params.id
+            const userId=req.user._id
+            const service=await ServiceModel.findOne({_id:service_id,user_id:userId})
+            if (!service) {
+                return res.status(200).json({status:400,message:"Không tìm thấy dịch vụ"})
+            }
+            service.status="inactive"
+            await service.save()
+            return res.status(200).json({status:200,message:"Xóa dịch vụ thành công"})
+        } catch (error) {
+            return res.status(500).json({status:500,message:error.message})
+        }
     }
 }
 module.exports = new ServiceRepository()
