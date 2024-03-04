@@ -15,5 +15,8 @@ class UserController{
     async getRepairmanById(req,res){
         await UserRepository.getRepairmanById(req,res)
     }
+    async editInformation(req,res){
+        await UserRepository.editInformation(req,res)
+    }
 }
 module.exports=new UserController()

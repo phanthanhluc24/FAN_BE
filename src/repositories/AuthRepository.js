@@ -15,7 +15,9 @@ class AuthRepository {
     async register(req, res) {
         try {
             const { full_name, email, number_phone, password, address, role, category_id } = req.body
-            if (validator.isEmpty(full_name) || validator.isEmpty(email) || validator.isEmpty(number_phone) || validator.isEmpty(password) || validator.isEmpty(role)) {
+            if (validator.isEmpty(full_name) || validator.isEmpty(email) || validator.isEmpty(number_phone) || validator.isEmpty(password) || validator.isEmpty(role)
+                ||full_name.trim().length===0 ||email.trim().length===0 ||number_phone.trim().length===0 || validator.isEmpty(role)
+            ) {
                 return res.status(201).json({ status: 400, message: "Tất cả các trường không được bỏ trống" })
             }
             if (!validator.isEmail(email)) {
@@ -24,8 +26,8 @@ class AuthRepository {
             if (!validator.isMobilePhone(number_phone, "vi-VN")) {
                 return res.status(201).json({ status: 400, message: "Số điện thoại không hợp lệ" })
             }
-            const exitAccount = await UserModel.findOne({ $or: [{ email: email }, { number_phone: number_phone }] })
-            if (exitAccount) {
+            const exitAccount = await UserModel.findOne({$or: [{ email: email }, { number_phone: number_phone }],status: { $ne: "inactive" }});
+            if (!exitAccount) {
                 return res.status(201).json({ status: 409, message: "Email hoặc số điện thoại đã được đăng ký" })
             }
             const options = {
@@ -60,7 +62,7 @@ class AuthRepository {
             const refreshCode = await JWT.sign({ _id: newUser._id }, CODE_TOKEN_REFRESH, { expiresIn: "1h" })
             return res.status(200).json({ status: 201, message: "Tạo tại khoản thành công", code: codeToken, refreshCode: refreshCode })
         } catch (error) {
-            return res.status(400).json({ status: 500, message: "Thiếu trường dữ liệu cần thiết" })
+            return res.status(400).json({ status: 500, message: error.message })
         }
 
     }
@@ -110,7 +112,7 @@ class AuthRepository {
     }
 
     async login(req, res) {
-        const { email, password } = req.body
+        const { email, password, deviceToken } = req.body
         if (validator.isEmpty(email) || validator.isEmpty(password)) {
             return res.status(201).json({ status: 400, message: "Email và mật khẩu không được bỏ trống" })
         }
@@ -128,11 +130,12 @@ class AuthRepository {
         const accessToken = await this.generateAccessToken({_id:user._id})
         const refreshToken = await this.generateRefreshToken({_id:user._id})
         user.refreshToken=refreshToken
+        user.deviceToken=deviceToken
         await user.save();
         return res.status(201).json({ status: 201, message: "Đăng nhập thành công", accessToken, refreshToken })
     }
     generateAccessToken(payload) {
-        const accessToken = JWT.sign(payload, ACCESS_TOKEN, { expiresIn: "2h" })
+        const accessToken = JWT.sign(payload, ACCESS_TOKEN, { expiresIn: "7d" })
         return accessToken
     }
     generateRefreshToken(payload) {
@@ -200,7 +203,7 @@ class AuthRepository {
             if(!user){
                 return res.status(201).json({status:401,message:"Mã token không hợp lệ"})
             }
-            const accessToken=await this.generateAccessToken({id:user._id})
+            const accessToken=await this.generateAccessToken({_id:user._id})
             return res.status(200).json({status:200,accessToken})
         } catch (error) {
             return res.status(500).json({status:500,message:error.message})
@@ -210,7 +213,7 @@ class AuthRepository {
     async getCurrentUser(req,res){
         try {
             const userId=req.user._id
-            const user=await UserModel.findById(userId).select("image full_name")
+            const user=await UserModel.findById(userId)
             if (!user) {
                 return res.status(201).json({status:401,message:"Không tìm thấy người dùng"})
             }

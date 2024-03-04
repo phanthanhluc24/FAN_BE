@@ -23,5 +23,12 @@ class ServiceController{
         await ServiceRepository.getServiceRelateByCategory(req,res)
     }
     
+    async editServiceOfRepairman(req,res){
+        await ServiceRepository.editServiceOfRepairman(req,res)
+    }
+
+    async destroyServiceOfRepairman(req,res){
+        await ServiceRepository.destroyServiceOfRepairman(req,res)
+    }
 }
 module.exports=new ServiceController()
