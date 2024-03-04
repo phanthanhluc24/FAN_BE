@@ -130,7 +130,7 @@ class ServiceRepository {
     async getServiceOfRepairmanSpecific(req, res) {
         try {
             const { id } = req.params
-            const services = await ServiceModel.find({ user_id: id })
+            const services = await ServiceModel.find({ user_id: id,status:"active" })
             if (services.length < 1) {
                 return res.status(201).json({ status: 200, message: "Thợ này chưa có bất kỳ dịch vụ nào", data: services })
             }
@@ -143,7 +143,7 @@ class ServiceRepository {
     async getServiceOfRepairmanCurrent(req, res) {
         try {
             const userId = req.user._id
-            const services = await ServiceModel.find({ user_id: userId })
+            const services = await ServiceModel.find({ user_id: userId,status:"active" })
             if (services.length < 1) {
                 return res.status(201).json({ status: 200,data:services, message: "Bạn chưa có dịch vụ nào" })
             }
@@ -168,7 +168,7 @@ class ServiceRepository {
             const serviceRelatedByCategory = serviceCategory
                 .map(service => service._id)
                 .filter(id => id.toString() !== service_id);
-            const relatedServices = await ServiceModel.find({ user_id: { $in: serviceRelatedByCategory },_id:{$ne:service_id}});
+            const relatedServices = await ServiceModel.find({ user_id: { $in: serviceRelatedByCategory },_id:{$ne:service_id},status:{$ne:"inactive"}});
             if (relatedServices.length<1) {
                 return res.status(201).json({status:201,message:"không có dịch vụ liên quan nào được tìm thấy",data:relatedServices})
             }
