@@ -4,6 +4,8 @@ const ServiceModel = require("../models/ServiceModel")
 const NotificationModel = require("../models/NotificationModel")
 const admin = require("firebase-admin")
 const validator = require("validator")
+const bookingModel = require("../models/BookingModel")
+const { promise } = require("bcrypt/promises")
 admin.initializeApp({
   credential: admin.credential.cert(require("../json/serviceAccountKey.json"))
 })
@@ -120,11 +122,67 @@ class BookingRepository {
           await booking.save()
           return res.status(200).json({ status: 200, message: "Chúc mừng bạn đã sửa thành công" })
         default:
-          return res.status(200).json({ status: 400, message:"Không thể cập nhật trạng thái đơn sửa"})
+          return res.status(200).json({ status: 400, message: "Không thể cập nhật trạng thái đơn sửa" })
       }
     } catch (error) {
       return res.status(200).json({ status: 400, message: error.message })
     }
   }
+
+  async getBookingByStatus(req, res) {
+    try {
+      const userId = req.user._id;
+      const option = parseInt(req.params.option);
+      if (!Number.isInteger(option) || option < 1 || option > 4) {
+        return res.status(400).json({ status: 400, message: 'Không hợp lệ tham số tùy chọn' });
+      }
+
+      let status;
+      switch (option) {
+        case 1:
+          status = "Chờ xác nhận";
+          break;
+        case 2:
+          status = "Đã nhận đơn sửa";
+          break;
+        case 3:
+          status = "Đã hủy đơn";
+          break;
+        case 4:
+          status = "Đã sửa thành công";
+          break;
+        default:
+          return res.status(500).json({ status: 500, message: 'Giá trị không hợp lệ' });
+      }
+      const activeServices = await ServiceModel.find({ user_id: userId, status: "active" });
+      if (activeServices.length < 1) {
+        const userBookings = await BookingModel.find({ user_id: userId, status: status })
+          .populate({ path: "service_id", select: "image" })
+        if (userBookings.length < 1) {
+          return res.status(200).json({ status: 200, data: [] });
+        }
+        return res.status(200).json({ status: 200, data: userBookings });
+      } else {
+        const bookings = await Promise.all(
+          activeServices.map(async (service) => {
+            const serviceBookings = await BookingModel.find({ service_id: service._id, status })
+              .populate({ path: "service_id", select: "image" })
+
+            if (serviceBookings.length > 0) {
+              return serviceBookings;
+            } else {
+              return [];
+            }
+          })
+        );
+        const flattenedBookings = bookings.flat();
+        return res.status(200).json({ status: 200, data: flattenedBookings });
+      }
+    } catch (error) {
+      console.error(error)
+      return res.status(500).json({ status: 500, message: 'Internal server error' });
+    }
+  }
+
 }
 module.exports = new BookingRepository()
