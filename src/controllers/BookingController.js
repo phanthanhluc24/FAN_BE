@@ -15,5 +15,13 @@ class BookingController{
     async getBookingByStatus(req,res){
         await BookingRepository.getBookingByStatus(req,res)
     }
+
+    async getBookingStatusOfRepairman(req,res){
+        await BookingRepository.getBookingStatusOfRepairman(req,res)
+    }
+
+    async getDetailBooking(req,res){
+        await BookingRepository.getDetailBooking(req,res)
+    }
 }
 module.exports=new BookingController()

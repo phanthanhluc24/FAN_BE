@@ -4,7 +4,7 @@ const Schema=mongoose.Schema
 const bookingSchema=new Schema({
     user_id:{type:Schema.Types.ObjectId,ref:"users",require:true},
     service_id:{type:Schema.Types.ObjectId,ref:"services",require:true},
-    status:{type:String,enum:["Chờ xác nhận","Đã nhận đơn sửa","Đã hủy đơn","Đã sửa thành công"],default:"Chờ xác nhận"},
+    status:{type:String,enum:["Chờ xác nhận","Đã nhận đơn sửa","Đã hủy đơn","Đã sửa hoàn thành"],default:"Chờ xác nhận"},
     address:{type:String,require:true},
     fee_service:{type:Number,require:true},
     fee_transport:{type:Number,require:true},
