@@ -154,35 +154,87 @@ class BookingRepository {
         default:
           return res.status(500).json({ status: 500, message: 'Giá trị không hợp lệ' });
       }
-      const activeServices = await ServiceModel.find({ user_id: userId, status: "active" });
-      if (activeServices.length < 1) {
         const userBookings = await BookingModel.find({ user_id: userId, status: status })
-          .populate({ path: "service_id", select: "image" })
+          .populate({ path: "service_id", select: "image service_name" })
         if (userBookings.length < 1) {
           return res.status(200).json({ status: 200, data: [] });
         }
         return res.status(200).json({ status: 200, data: userBookings });
-      } else {
-        const bookings = await Promise.all(
-          activeServices.map(async (service) => {
-            const serviceBookings = await BookingModel.find({ service_id: service._id, status })
-              .populate({ path: "service_id", select: "image" })
-
-            if (serviceBookings.length > 0) {
-              return serviceBookings;
-            } else {
-              return [];
-            }
-          })
-        );
-        const flattenedBookings = bookings.flat();
-        return res.status(200).json({ status: 200, data: flattenedBookings });
-      }
     } catch (error) {
       console.error(error)
       return res.status(500).json({ status: 500, message: 'Internal server error' });
     }
   }
 
+  async getBookingStatusOfRepairman(req,res){
+    try {
+      const userId=req.user._id
+      const option = parseInt(req.params.option);
+      if (!Number.isInteger(option) || option < 1 || option > 4) {
+        return res.status(400).json({ status: 400, message: 'Không hợp lệ tham số tùy chọn' });
+      }
+
+      let status;
+      switch (option) {
+        case 1:
+          status = "Chờ xác nhận";
+          break;
+        case 2:
+          status = "Đã nhận đơn sửa";
+          break;
+        case 3:
+          status = "Đã hủy đơn";
+          break;
+        case 4:
+          status = "Đã sửa thành công";
+          break;
+        default:
+          return res.status(500).json({ status: 500, message: 'Giá trị không hợp lệ' });
+      }
+      const activeServices = await ServiceModel.find({ user_id: userId, status: "active" });
+      if (activeServices.length<1) {
+        return res.status(200).json({status:400,message:"Người dùng này không phải là thợ",data:[]})
+      }
+      const bookings = await Promise.all(
+        activeServices.map(async (service) => {
+          const serviceBookings = await BookingModel.find({ service_id: service._id, status })
+            .populate({ path: "service_id", select: "image" })
+
+          if (serviceBookings.length > 0) {
+            return serviceBookings;
+          } else {
+            return [];
+          }
+        }))
+        const flattenedBookings = bookings.flat();
+      return res.status(200).json({ status: 200, data: flattenedBookings });
+    } catch (error) {
+      console.error(error)
+      return res.status(500).json({ status: 500, message: 'Lỗi trên server' });
+    }
+  }
+
+  async getDetailBooking(req,res){
+    try {
+      const booking_id=req.params.id
+      const booking=await BookingModel.findOne({_id:booking_id})
+      .populate({
+        path: 'user_id',
+        select: 'full_name email'
+      })
+      .populate({
+        path: 'service_id',
+        select: 'service_name image price'
+      })
+      if (!booking) {
+        return res.status(200).json({status:400,message:"Không tìm thấy đơn hàng"})
+      }
+      // const totalPrice=booking.service_id.price+booking.fee_service+booking.fee_transport
+      // booking.sum=totalPrice
+      return res.status(200).json({status:200,data:booking})
+    } catch (error) {
+      return res.status(500).json({status:500,message:error.message})
+    }
+  }
 }
 module.exports = new BookingRepository()

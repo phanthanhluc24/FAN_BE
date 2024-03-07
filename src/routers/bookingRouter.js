@@ -5,4 +5,6 @@ router.get("/check/:id",BookingController.checkBooking)
 router.post("/notification/:service_id/:repairman_id",BookingController.notificationToClient)
 router.put("/changeStatusByRepairman/:id/:option",BookingController.changeStatusBookingByRepairman)
 router.get("/byStatus/:option",BookingController.getBookingByStatus)
+router.get("/byStatusBooking/:option",BookingController.getBookingStatusOfRepairman)
+router.get("/detailBooking/:id",BookingController.getDetailBooking)
 module.exports=router
