@@ -50,7 +50,7 @@ class BookingRepository {
       if (repairman_id == userId) {
         return res.status(200).json({ status: 401, message: "Bạn không thể tự đặt dịch vụ của mình" })
       }
-      const booking = await this.bookingService(address, priceTransport, priceService, userId, service_id, desc)
+      const booking = await this.bookingService(address, priceTransport, priceService, userId, service_id, desc,dayRepair, timeRepair)
       if (!booking) {
         return res.status(200).json({ status: 400, message: "Đặt dịch vụ không thành công" })
       }
@@ -85,13 +85,15 @@ class BookingRepository {
     }
   }
 
-  async bookingService(address, priceTransport, priceService, user_id, service_id, desc) {
+  async bookingService(address, priceTransport, priceService, user_id, service_id, desc,dayRepair, timeRepair) {
     const booking = new BookingModel()
     booking.user_id = user_id
     booking.service_id = service_id
     booking.address = address
     booking.fee_service = priceService
     booking.fee_transport = priceTransport
+    booking.day_repair=dayRepair
+    booking.time_repair=timeRepair
     booking.desc = desc
     await booking.save()
     return booking

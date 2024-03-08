@@ -8,6 +8,8 @@ const bookingSchema=new Schema({
     address:{type:String,require:true},
     fee_service:{type:Number,require:true},
     fee_transport:{type:Number,require:true},
+    day_repair:{type:String,require:true},
+    time_repair:{type:String,require:true},
     payment:{type:String,default:"No"},
     desc:{type:String,require:true}
 },{
