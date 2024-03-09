@@ -11,7 +11,8 @@ const bookingSchema=new Schema({
     day_repair:{type:String,require:true},
     time_repair:{type:String,require:true},
     payment:{type:String,default:"No"},
-    desc:{type:String,require:true}
+    desc:{type:String,require:true},
+    comment:{type:String}
 },{
     timestamps:true
 })

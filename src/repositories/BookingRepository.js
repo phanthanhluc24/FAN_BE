@@ -104,24 +104,51 @@ class BookingRepository {
       const userId = req.user._id
       const booking_id = req.params.id
       const option = parseInt(req.params.option)
-      console.log(option);
-      const booking = await BookingModel.findOne({ _id: booking_id }).select("service_id")
+      const booking = await BookingModel.findOne({ _id: booking_id }).select("service_id user_id")
       const service = await ServiceModel.findOne({ _id: booking.service_id, user_id: userId, status: "active" })
       if (!service) {
         return res.status(200).json({ status: 400, message: "Không tìm thấy dịch vụ để cập nhật trạng thái" })
+      }
+      const user=await UserModel.findOne({_id:booking.user_id})
+      let status;
+      switch (option) {
+        case 1:
+          status="Đã nhận đơn sửa"
+          break;
+        case 2:
+          status="Đã hủy đơn"
+          break;
+        case 3:
+          status="Đã sửa hoàn thành"
+          break;
+        default:
+          break;
+      }
+      const payloadNotification = {
+        notification: {
+          title: "Fix All Now",
+          body: `Thợ ${status}`,
+        },
+        data: {
+          status:"BK"
+        }
       }
       switch (option) {
         case 1:
           booking.status = "Đã nhận đơn sửa"
           await booking.save()
+          await admin.messaging().sendToDevice(user.deviceToken,payloadNotification)
           return res.status(200).json({ status: 200, message: "Tiếp nhận đơn sửa thành công" })
         case 2:
           booking.status = "Đã hủy đơn"
           await booking.save()
+          await admin.messaging().sendToDevice(user.deviceToken,payloadNotification)
           return res.status(200).json({ status: 200, message: "Hủy đơn sửa thành công" })
         case 3:
-          booking.status = "Đẫ sửa thành công"
+          booking.status = "Đã sửa hoàn thành"
+          booking.comment="active"
           await booking.save()
+          await admin.messaging().sendToDevice(user.deviceToken,payloadNotification)
           return res.status(200).json({ status: 200, message: "Chúc mừng bạn đã sửa thành công" })
         default:
           return res.status(200).json({ status: 400, message: "Không thể cập nhật trạng thái đơn sửa" })
@@ -200,7 +227,7 @@ class BookingRepository {
       const bookings = await Promise.all(
         activeServices.map(async (service) => {
           const serviceBookings = await BookingModel.find({ service_id: service._id, status })
-            .populate({ path: "service_id", select: "image" })
+            .populate({ path: "service_id", select: "image service_name" })
 
           if (serviceBookings.length > 0) {
             return serviceBookings;

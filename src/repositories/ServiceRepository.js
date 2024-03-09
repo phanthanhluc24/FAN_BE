@@ -7,7 +7,7 @@ const ServiceModel = require("../models/ServiceModel")
 const validator = require("validator")
 const UserModel = require("../models/UserModel")
 const Mail = require("../utils/sendNotificationService")
-const unidecode=require("unidecode")
+const BookingModel=require("../models/BookingModel")
 const giveCurrentDateTime = () => {
     const today = new Date();
     const date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
@@ -245,6 +245,10 @@ class ServiceRepository {
             const service=await ServiceModel.findOne({_id:service_id,user_id:userId})
             if (!service) {
                 return res.status(200).json({status:400,message:"Không tìm thấy dịch vụ"})
+            }
+            const checkBooking=await BookingModel.find({service_id:service._id})
+            if (checkBooking.length>=1) {
+                return res.status(200).json({status:401,message:"Bạn không thể xóa dịch vụ này"})
             }
             service.status="inactive"
             await service.save()
