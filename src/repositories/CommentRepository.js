@@ -43,9 +43,8 @@ class CommentRepository {
 
     async getCommentOfService(req,res){
         try {
-            const service_id=req.params.service_id
-            console.log(service_id);
-            const comment =await CommentModel.find({service_id:service_id}).populate({path:"commenter_id",select: { image: 1, full_name: 1 }})
+            const repairman_id=req.params.repairman_id
+            const comment =await CommentModel.find({receiver_id:repairman_id}).populate({path:"commenter_id",select: { image: 1, full_name: 1 }})
             if (comment.length<1) {
                 return res.status(200).json({status:200,message:"Chưa có bình luận nào"})
             }
