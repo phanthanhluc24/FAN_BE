@@ -146,7 +146,6 @@ class BookingRepository {
           return res.status(200).json({ status: 200, message: "Hủy đơn sửa thành công" })
         case 3:
           booking.status = "Đã sửa hoàn thành"
-          booking.comment="active"
           await booking.save()
           await admin.messaging().sendToDevice(user.deviceToken,payloadNotification)
           return res.status(200).json({ status: 200, message: "Chúc mừng bạn đã sửa thành công" })
