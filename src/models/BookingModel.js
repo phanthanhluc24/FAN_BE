@@ -10,7 +10,7 @@ const bookingSchema=new Schema({
     fee_transport:{type:Number,require:true},
     day_repair:{type:String,require:true},
     time_repair:{type:String,require:true},
-    payment:{type:String,default:"No"},
+    payment:{type:String,require:true},
     desc:{type:String,require:true},
     comment:{type:String}
 },{

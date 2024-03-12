@@ -25,7 +25,7 @@ class BookingRepository {
     }
   }
   async sendNotificationToClient(req, res) {
-    const { priceTransport, priceService, address, dayRepair, timeRepair, desc } = req.body
+    const { priceTransport, priceService, address, dayRepair, timeRepair, desc,payment } = req.body
     const service_id = req.params.service_id
     const repairman_id = req.params.repairman_id
     const userId = req.user._id
@@ -50,7 +50,7 @@ class BookingRepository {
       if (repairman_id == userId) {
         return res.status(200).json({ status: 401, message: "Bạn không thể tự đặt dịch vụ của mình" })
       }
-      const booking = await this.bookingService(address, priceTransport, priceService, userId, service_id, desc,dayRepair, timeRepair)
+      const booking = await this.bookingService(address, priceTransport, priceService, userId, service_id, desc,dayRepair, timeRepair,payment)
       if (!booking) {
         return res.status(200).json({ status: 400, message: "Đặt dịch vụ không thành công" })
       }
@@ -85,7 +85,7 @@ class BookingRepository {
     }
   }
 
-  async bookingService(address, priceTransport, priceService, user_id, service_id, desc,dayRepair, timeRepair) {
+  async bookingService(address, priceTransport, priceService, user_id, service_id, desc,dayRepair, timeRepair,payment) {
     const booking = new BookingModel()
     booking.user_id = user_id
     booking.service_id = service_id
@@ -95,6 +95,8 @@ class BookingRepository {
     booking.day_repair=dayRepair
     booking.time_repair=timeRepair
     booking.desc = desc
+    booking.payment=payment
+    booking.comment="active"
     await booking.save()
     return booking
   }
@@ -177,12 +179,13 @@ class BookingRepository {
           status = "Đã hủy đơn";
           break;
         case 4:
-          status = "Đã sửa thành công";
+          status = "Đã sửa hoàn thành";
           break;
         default:
           return res.status(500).json({ status: 500, message: 'Giá trị không hợp lệ' });
       }
         const userBookings = await BookingModel.find({ user_id: userId, status: status })
+          .sort({createdAt:-1})
           .populate({ path: "service_id", select: "image service_name" })
         if (userBookings.length < 1) {
           return res.status(200).json({ status: 200, data: [] });
@@ -214,7 +217,7 @@ class BookingRepository {
           status = "Đã hủy đơn";
           break;
         case 4:
-          status = "Đã sửa thành công";
+          status = "Đã sửa hoàn thành";
           break;
         default:
           return res.status(500).json({ status: 500, message: 'Giá trị không hợp lệ' });
@@ -226,6 +229,7 @@ class BookingRepository {
       const bookings = await Promise.all(
         activeServices.map(async (service) => {
           const serviceBookings = await BookingModel.find({ service_id: service._id, status })
+            .sort({createdAt:-1})
             .populate({ path: "service_id", select: "image service_name" })
 
           if (serviceBookings.length > 0) {
