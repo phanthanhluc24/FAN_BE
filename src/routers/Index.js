@@ -8,6 +8,9 @@ const bookingRouter=require("../routers/bookingRouter")
 const apRouter=require("../routers/aiRouter")
 const notificationRouter=require("../routers/notificationRouter")
 const stripeRouter=require("../routers/stripeRouter")
+const adminRouter=require("../routers/adminRouter")
+const chatRouter=require("../routers/chatRouter")
+const messageRouter=require("../routers/messageRouter")
 function Router(app){
     app.use("/category",categoryRouter)
     app.use("/auth",authRouter)
@@ -18,5 +21,8 @@ function Router(app){
     app.use("/chatGPT",apRouter)
     app.use("/notification",authMiddleware,notificationRouter)
     app.use("/stripe",stripeRouter)
+    app.use("/admin",adminRouter)
+    app.use("/chat",authMiddleware,chatRouter)
+    app.use("/message",authMiddleware,messageRouter)
 }
 module.exports=Router
