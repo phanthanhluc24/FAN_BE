@@ -27,7 +27,7 @@ class AuthRepository {
                 return res.status(201).json({ status: 400, message: "Số điện thoại không hợp lệ" })
             }
             const exitAccount = await UserModel.findOne({$or: [{ email: email }, { number_phone: number_phone }],status: { $ne: "inactive" }});
-            if (!exitAccount) {
+            if (exitAccount) {
                 return res.status(201).json({ status: 409, message: "Email hoặc số điện thoại đã được đăng ký" })
             }
             const options = {
