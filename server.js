@@ -36,13 +36,32 @@ io.on("connection",(socket)=>{
     socket.on("chat-with-new-partner",(newUserId)=>{
         if (!activeUserChat.some((user)=>user.userId==newUserId)) {
             activeUserChat.push({
-                receiveId:newUserId,
+                userId:newUserId,
                 socketId:socket.id
             })
             console.log("User connected",activeUserChat);
         }
     })
+
+    socket.on("send-new-conversation",(data)=>{
+        const {receivedId}=data
+        console.log("recied",receivedId);
+        const received = activeUserChat.find(
+            (user) => user.userId === receivedId
+          );
+          console.log("B",received);
+          console.log("sending message to ", receivedId);
+          console.log("message ", JSON.stringify(data));
+          if (received) {
+            io.except(received.socketId).emit(
+              "received-message-from-server",
+              data
+            );
+            console.log("Message sent successfully to user: ", received.socketId);
+          }
+    })
 })
+
 // Server listening on port
 server.listen(PORT,()=>{
     console.log(`Server listening on port ${PORT}`);
