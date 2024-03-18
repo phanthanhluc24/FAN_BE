@@ -1,13 +1,15 @@
 const messageModel = require("../models/MessageModel");
 const chatModel = require("../models/ChatModel");
+const mongoose = require('mongoose');
 class MessageController {
   async findChat(senderId, receivedId) {
     try {
       const chat = await chatModel.findOne({
         users: { $all: [senderId, receivedId] },
       });
-      return res.status(200).json({ status: 200, data: chat });
+      return chat
     } catch (error) {
+      console.log(error);
       return res.status(500).json({ status: 500, message: error.message })
     }
   }
@@ -35,6 +37,7 @@ class MessageController {
         return res.status(200).json({ message: "Add message successfully", messages });
       }
     } catch (error) {
+      console.log(error);
       return res.status(500).json({ status: 500, message: error.message })
     }
   }
