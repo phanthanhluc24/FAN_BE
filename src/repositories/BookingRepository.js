@@ -255,7 +255,7 @@ class BookingRepository {
       const booking=await BookingModel.findOne({_id:booking_id})
       .populate({
         path: 'user_id',
-        select: 'full_name email'
+        select: 'full_name number_phone'
       })
       .populate({
         path: 'service_id',
@@ -269,6 +269,37 @@ class BookingRepository {
       return res.status(200).json({status:200,data:booking})
     } catch (error) {
       return res.status(500).json({status:500,message:error.message})
+    }
+  }
+
+  async userCancelBooking(req,res){
+    try {
+      const userId=req.user._id
+      const booking_id=req.params.id
+      const booking=await BookingModel.findOne({_id:booking_id,user_id:userId}).select("service_id")
+      if (!booking) {
+        return res.status(201).json({status:201,message:"Bạn không thể hủy dịch vụ này"})
+      }
+      const service = await ServiceModel.findOne({ _id: booking.service_id,status: "active" }).populate({path:"user_id",select:"_id"})
+      if (!service) {
+        return res.status(201).json({status:201,message:"Bạn không thể hủy dịch vụ này"})
+      }
+      const user=await UserModel.findOne({_id:service.user_id._id}).select("deviceToken full_name")
+      if (user.deviceToken=="") {
+        return res.status(201).json({status:201,message:"Không thể thông báo đến thợ"})
+      }
+      const payloadNotification = {
+        notification: {
+          title: "Fix All Now",
+          body: `${user.full_name} đã hủy dịch vụ`,
+        },
+      }
+      booking.status="Đã hủy đơn"
+      await booking.save()
+      await admin.messaging().sendToDevice(user.deviceToken,payloadNotification)
+      return res.status(200).json({status:200,message:"Huỷ dịch vụ thành công"})
+    } catch (error) {
+      console.log(error);
     }
   }
 }
