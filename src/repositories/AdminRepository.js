@@ -91,11 +91,52 @@ class AdminRepository {
             return res.status(201).json({ status: 401, message: "Mật khẩu không đúng" })
         }
         const accessToken = await this.generateAccessToken({_id:user._id})
+
         return res.status(201).json({ status: 201, message: "Đăng nhập thành công", accessToken})
     }
     generateAccessToken(payload) {
         const accessToken = JWT.sign(payload, ACCESS_TOKEN, { expiresIn: "7d" })
         return accessToken
+    }
+
+    async blockAccountUser(req, res) {
+        try {
+            const id = req.params.id;
+            const user = await UserModel.findOne({ _id: id });
+    
+            if (!user) {
+                return res.status(404).json({ status: 404, message: "Không tìm thấy tài khoản" });
+            }
+    
+            // Toggle user status
+            user.status = user.status === "active" ? "inactive" : "active";
+            await user.save();
+    
+            const message = user.status === "active" ? "Khóa tài khoản thành công" : "Mở tài khoản thành công";
+            return res.status(201).json({ status: 201, message });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ status: 500, message: "Lỗi từ server" });
+        }
+    }
+
+    async checkPermissionService(req,res){
+        try {
+            const id=req.params.id
+            const option=parseInt(req.params.option)
+            const service=await ServiceModel.findOne({_id:id})
+            if (option==1) {
+                service.status="active"
+                await service.save()
+                return res.status(201).json({status:201,message:"Kiểm duyệt thành công"})
+            }else if(option==2){
+                service.status="reject"
+                await service.save()
+                return res.status(201).json({status:201,message:"Thừ chối thành công"})
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 }
 module.exports = new AdminRepository()
