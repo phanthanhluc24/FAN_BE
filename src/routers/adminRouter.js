@@ -5,4 +5,6 @@ router.get("/repairmans/:currentPage",AdminController.getRepairmans)
 router.get("/repairmanFinder/:currentPage",AdminController.getRepairmanFinder)
 router.get("/service/:currentPage",AdminController.getServiceOfRepairman)
 router.post("/login",AdminController.adminLogin)
+router.put("/blockAccount/:id",AdminController.blockAccountUser)
+router.put("/allowPermission/:id/:option",AdminController.checkPermissionService)
 module.exports=router

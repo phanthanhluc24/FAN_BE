@@ -50,6 +50,9 @@ class BookingRepository {
       if (repairman_id == userId) {
         return res.status(200).json({ status: 401, message: "Bạn không thể tự đặt dịch vụ của mình" })
       }
+      if(userDeviceId.deviceToken===""){
+        return res.status(201).json({status:200,message:"Thiết bên kia chưa có diviceToken"})
+      }
       const booking = await this.bookingService(address, priceTransport, priceService, userId, service_id, desc,dayRepair, timeRepair,payment)
       if (!booking) {
         return res.status(200).json({ status: 400, message: "Đặt dịch vụ không thành công" })
@@ -185,7 +188,7 @@ class BookingRepository {
           return res.status(500).json({ status: 500, message: 'Giá trị không hợp lệ' });
       }
         const userBookings = await BookingModel.find({ user_id: userId, status: status })
-          .sort({createdAt:-1})
+          .sort({updatedAt:-1})
           .populate({ path: "service_id", select: "image service_name" })
         if (userBookings.length < 1) {
           return res.status(200).json({ status: 200, data: [] });
@@ -229,7 +232,7 @@ class BookingRepository {
       const bookings = await Promise.all(
         activeServices.map(async (service) => {
           const serviceBookings = await BookingModel.find({ service_id: service._id, status })
-            .sort({createdAt:-1})
+            .sort({updatedAt:-1})
             .populate({ path: "service_id", select: "image service_name" })
 
           if (serviceBookings.length > 0) {
