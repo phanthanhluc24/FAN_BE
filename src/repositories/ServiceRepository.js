@@ -8,6 +8,7 @@ const validator = require("validator")
 const UserModel = require("../models/UserModel")
 const Mail = require("../utils/sendNotificationService")
 const BookingModel=require("../models/BookingModel")
+const sharp = require('sharp');
 const giveCurrentDateTime = () => {
     const today = new Date();
     const date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
@@ -41,6 +42,12 @@ class ServiceRepository {
             if (file.size > maxSizeBytes) {
                 return res.status(201).json({ status: 400, message: 'Dung lượng file quá lớn' });
             }
+
+            const compressedImageBuffer = await sharp(file.buffer)
+            .resize({ width: 800 }) // Điều chỉnh kích thước ảnh nếu cần
+            .jpeg({ quality: 80 }) // Chỉ rõ chất lượng của ảnh JPEG
+            .toBuffer();
+
             const dateTime = giveCurrentDateTime();
             const storageRef = ref(storage, `service/${req.file.originalname + "" + dateTime}`);
             // Create file metadata including the content type
@@ -48,7 +55,7 @@ class ServiceRepository {
                 contentType: req.file.mimetype,
             };
             // Upload the file in the bucket storage
-            const snapshot = await uploadBytesResumable(storageRef, req.file.buffer, metadata);
+            const snapshot = await uploadBytesResumable(storageRef, compressedImageBuffer, metadata);
             //by using uploadBytesResumable we can control the progress of uploading like pause, resume, cancel
             // Grab the public url
             const user = await UserModel.findById(userId)

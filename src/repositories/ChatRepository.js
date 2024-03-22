@@ -9,24 +9,29 @@ class ChatRepository{
     
             const otherUserIds = chatWithUser.flatMap(chat => chat.users).filter(userId => userId != id);
             const otherUsers = await userModel.find({ _id: { $in: otherUserIds } }).select("full_name image");
-            const contentMessage = await Promise.all(
+            const contentMessages = await Promise.all(
                 chatWithUser.map(async (chat) => {
                     const messages = await messageModel.findOne({ chatId: chat._id }).select("chatId message").sort({ updatedAt: -1 }).limit(1);
-                    return messages
+                    return messages;
                 })
             );
-    
-            // Kết hợp otherUsers và contentMessage vào một mảng mới
-            const combinedData = otherUsers.map((user, index) => ({
-                user: user,
-                content: contentMessage[index]
-            }));
+            const combinedData = otherUsers.map((user) => {
+                const chat = chatWithUser.find(chat => chat.users.includes(user._id));
+                const messages = contentMessages.find(messages => messages.chatId.equals(chat._id));
+                return {
+                    user: user,
+                    content: messages
+                };
+            });
     
             return res.status(201).json(combinedData);
         } catch (error) {
+            console.log(error);
             return res.status(501).json(error);
         }
     }
+    
+    
     
     async compareGetIdRoomChat(req,res){
         const senderId=req.params.senderId

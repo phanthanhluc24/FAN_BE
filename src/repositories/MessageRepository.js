@@ -1,7 +1,9 @@
 const messageModel = require("../models/MessageModel");
 const chatModel = require("../models/ChatModel");
 const mongoose = require('mongoose');
-class MessageController {
+const UserModel=require("../models/UserModel")
+const admin = require("firebase-admin")
+class MessageRepository {
   async findChat(senderId, receivedId) {
     try {
       const chat = await chatModel.findOne({
@@ -17,13 +19,21 @@ class MessageController {
     try {
       const { receivedId, message } = req.body;
       const senderId = req.user._id
+      const user=await UserModel.findOne({_id:receivedId}).select("deviceToken")
       const existingChat = await this.findChat(senderId, receivedId);
+      const payloadNotification = {
+        notification: {
+          title: "Tin nhắn mới",
+          body: `${message}`,
+        }
+      }
       if (existingChat) {
         const messages = await messageModel.create({
           chatId: existingChat._id,
           senderId,
           message,
         });
+        await admin.messaging().sendToDevice(user.deviceToken,payloadNotification)
         return res.status(200).json({ message: "Add message successfully", messages });
       } else {
         const chat = await chatModel.create({
@@ -34,6 +44,7 @@ class MessageController {
           senderId,
           message,
         });
+        await admin.messaging().sendToDevice(user.deviceToken,payloadNotification)
         return res.status(200).json({ message: "Add message successfully", messages });
       }
     } catch (error) {
@@ -57,4 +68,4 @@ class MessageController {
     }
   }
 }
-module.exports = new MessageController();
+module.exports = new MessageRepository();

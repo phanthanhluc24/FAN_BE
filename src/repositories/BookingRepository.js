@@ -4,8 +4,6 @@ const ServiceModel = require("../models/ServiceModel")
 const NotificationModel = require("../models/NotificationModel")
 const admin = require("firebase-admin")
 const validator = require("validator")
-const bookingModel = require("../models/BookingModel")
-const { promise } = require("bcrypt/promises")
 admin.initializeApp({
   credential: admin.credential.cert(require("../json/serviceAccountKey.json"))
 })
@@ -133,9 +131,6 @@ class BookingRepository {
         notification: {
           title: "Fix All Now",
           body: `Thợ ${status}`,
-        },
-        data: {
-          status:"BK"
         }
       }
       switch (option) {
@@ -188,8 +183,8 @@ class BookingRepository {
           return res.status(500).json({ status: 500, message: 'Giá trị không hợp lệ' });
       }
         const userBookings = await BookingModel.find({ user_id: userId, status: status })
-          .sort({updatedAt:-1})
-          .populate({ path: "service_id", select: "image service_name" })
+        .populate({ path: "service_id", select: "image service_name" })
+        .sort({updatedAt:-1})
         if (userBookings.length < 1) {
           return res.status(200).json({ status: 200, data: [] });
         }
@@ -232,8 +227,8 @@ class BookingRepository {
       const bookings = await Promise.all(
         activeServices.map(async (service) => {
           const serviceBookings = await BookingModel.find({ service_id: service._id, status })
-            .sort({updatedAt:-1})
-            .populate({ path: "service_id", select: "image service_name" })
+          .populate({ path: "service_id", select: "image service_name" })
+          .sort({updatedAt:-1})
 
           if (serviceBookings.length > 0) {
             return serviceBookings;
@@ -241,7 +236,7 @@ class BookingRepository {
             return [];
           }
         }))
-        const flattenedBookings = bookings.flat();
+        const flattenedBookings = bookings.flat().sort((a, b) => b.updatedAt - a.updatedAt);
       return res.status(200).json({ status: 200, data: flattenedBookings });
     } catch (error) {
       console.error(error)
@@ -255,7 +250,7 @@ class BookingRepository {
       const booking=await BookingModel.findOne({_id:booking_id})
       .populate({
         path: 'user_id',
-        select: 'full_name number_phone'
+        select: 'full_name number_phone image'
       })
       .populate({
         path: 'service_id',
