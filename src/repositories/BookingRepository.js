@@ -97,7 +97,7 @@ class BookingRepository {
     booking.time_repair=timeRepair
     booking.desc = desc
     booking.payment=payment
-    booking.comment="active"
+    booking.comment="inactive"
     await booking.save()
     return booking
   }
@@ -146,6 +146,7 @@ class BookingRepository {
           return res.status(200).json({ status: 200, message: "Hủy đơn sửa thành công" })
         case 3:
           booking.status = "Đã sửa hoàn thành"
+          booking.comment="active"
           await booking.save()
           await admin.messaging().sendToDevice(user.deviceToken,payloadNotification)
           return res.status(200).json({ status: 200, message: "Chúc mừng bạn đã sửa thành công" })
@@ -273,13 +274,14 @@ class BookingRepository {
       const booking_id=req.params.id
       const booking=await BookingModel.findOne({_id:booking_id,user_id:userId}).select("service_id")
       if (!booking) {
+        console.log("oki");
         return res.status(201).json({status:201,message:"Bạn không thể hủy dịch vụ này"})
       }
-      const service = await ServiceModel.findOne({ _id: booking.service_id,status: "active" }).populate({path:"user_id",select:"_id"})
+      const service = await ServiceModel.findOne({ _id: booking.service_id,status: "inactive" })
       if (!service) {
         return res.status(201).json({status:201,message:"Bạn không thể hủy dịch vụ này"})
       }
-      const user=await UserModel.findOne({_id:service.user_id._id}).select("deviceToken full_name")
+      const user=await UserModel.findOne({_id:userId}).select("deviceToken full_name")
       if (user.deviceToken=="") {
         return res.status(201).json({status:201,message:"Không thể thông báo đến thợ"})
       }

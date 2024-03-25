@@ -34,11 +34,14 @@ class ChatRepository{
     
     
     async compareGetIdRoomChat(req,res){
-        const senderId=req.params.senderId
+        const senderId=req.user._id
         const receivedId=req.params.receivedId
         try {
-            const chatId=await chatModel.findOne({users:{$all:[senderId,receivedId]}})
-            return res.status(201).json(chatId)
+            const chatId=await chatModel.findOne({users:{$all:[senderId,receivedId]}}).select("_id")
+            if (!chatId) {
+                return res.status(200).json({status:200,data:null})
+            }
+            return res.status(200).json(chatId)
         } catch (error) {
            return res.status(501).json("Fail to get chat room")
         }

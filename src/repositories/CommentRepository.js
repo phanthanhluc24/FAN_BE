@@ -35,7 +35,7 @@ class CommentRepository {
     async getServiceCanComment(req,res){
         try {
             const userId=req.user._id
-            const checkComment=await BookingModel.find({user_id:userId,comment:"active"}).populate("service_id")
+            const checkComment=await BookingModel.find({user_id:userId,comment:"active"}).populate("service_id").sort({createdAt:-1})
             if (checkComment.length<1) {
                 return res.status(200).json({status:400,message:"Chưa có dịch vụ nào để bình luận",data:[]})
             }
@@ -48,7 +48,7 @@ class CommentRepository {
     async getCommentOfService(req,res){
         try {
             const repairman_id=req.params.repairman_id
-            const comment =await CommentModel.find({receiver_id:repairman_id}).populate({path:"commenter_id",select: { image: 1, full_name: 1 }})
+            const comment =await CommentModel.find({receiver_id:repairman_id}).populate({path:"commenter_id",select: { image: 1, full_name: 1 }}).sort({createdAt:-1})
             if (comment.length<1) {
                 return res.status(200).json({status:200,message:"Chưa có bình luận nào"})
             }
