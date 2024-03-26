@@ -255,7 +255,7 @@ class BookingRepository {
       })
       .populate({
         path: 'service_id',
-        select: 'service_name image price'
+        select: 'service_name image price user_id'
       })
       if (!booking) {
         return res.status(200).json({status:400,message:"Không tìm thấy đơn hàng"})

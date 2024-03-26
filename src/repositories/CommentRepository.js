@@ -2,6 +2,7 @@ const CommentModel = require("../models/CommentModel")
 const BookingModel =require("../models/BookingModel")
 const ServiceModel =require("../models/ServiceModel")
 const validator = require("validator")
+const userModel = require("../models/UserModel")
 class CommentRepository {
     async commentRepairman(req, res) {
         try {
@@ -15,7 +16,7 @@ class CommentRepository {
             if (validator.isEmpty(star)||star.trim().length===0) {
                 return res.status(201).json({ status: 400, message: "Sao đánh giá không được trống" })
             }
-            const receiver_id=await ServiceModel.findOne({_id:service_id})
+            const receiver_id=await ServiceModel.findOne({_id:service_id}).populate("user_id")
             const booking=await BookingModel.findOne({_id:booking_id})
             const comment = new CommentModel()
             comment.commenter_id = commenter_id
@@ -26,7 +27,7 @@ class CommentRepository {
             await comment.save()
             booking.comment="inactive"
             await booking.save()
-            return res.status(201).json({status:201,message:"Bình luận và đánh giá thành công"})
+            return res.status(201).json({status:201,message:"Bình luận và đánh giá thành công",data:receiver_id})
         } catch (error) {
             return res.status(500).json({status:500,message:"Có lỗi xảy ra trong quá trình bình luận"})
         }
