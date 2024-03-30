@@ -23,5 +23,9 @@ class BookingController{
     async getDetailBooking(req,res){
         await BookingRepository.getDetailBooking(req,res)
     }
+
+    async userCancelBooking(req,res){
+        await BookingRepository.userCancelBooking(req,res)
+    }
 }
 module.exports=new BookingController()

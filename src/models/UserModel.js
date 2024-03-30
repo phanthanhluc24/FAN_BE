@@ -6,7 +6,7 @@ const userSchema=new Schema({
     number_phone:{type:Number,require:true,unique:true},
     password:{type:String,require:true},
     address:{type:String,default:""},
-    image:{type:String,default:"https://firebasestorage.googleapis.com/v0/b/fixallnow.appspot.com/o/avatar%2Fprofile.png?alt=media&token=503aa8fb-4e2d-47d2-91db-cf473d7e8039"},
+    image:{type:String,default:"https://firebasestorage.googleapis.com/v0/b/fixallnow.appspot.com/o/avatar%2Fprofile-default.png?alt=media&token=eb7b1210-3825-4d38-a91a-0324954f4f13"},
     role:{type:String,enum:["ADM","USR","RPM"],default:"USR"},
     status:{type:String,enum:["active","inactive"],default:"inactive"},
     category_id:{type:Schema.Types.ObjectId,ref:"categories",require:false},

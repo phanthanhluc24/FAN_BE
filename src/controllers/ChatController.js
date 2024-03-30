@@ -8,4 +8,4 @@ class ChatController{
         await ChatRepository.compareGetIdRoomChat(req,res)
     }
 }
-module.exports=new ChatController()
+module.exports=new ChatController();

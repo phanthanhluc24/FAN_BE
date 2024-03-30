@@ -15,5 +15,13 @@ class AdminController{
     async adminLogin(req,res){
         await AdminRepository.adminLogin(req,res)
     }
+
+    async blockAccountUser(req,res){
+        await AdminRepository.blockAccountUser(req,res)
+    }
+
+    async checkPermissionService(req,res){
+        await AdminRepository.checkPermissionService(req,res)
+    }
 }
 module.exports=new AdminController()

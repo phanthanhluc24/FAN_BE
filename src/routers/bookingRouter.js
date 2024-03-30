@@ -7,4 +7,5 @@ router.put("/changeStatusByRepairman/:id/:option",BookingController.changeStatus
 router.get("/byStatus/:option",BookingController.getBookingByStatus)
 router.get("/byStatusBooking/:option",BookingController.getBookingStatusOfRepairman)
 router.get("/detailBooking/:id",BookingController.getDetailBooking)
+router.put("/cancelService/:id",BookingController.userCancelBooking)
 module.exports=router

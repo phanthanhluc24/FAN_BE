@@ -4,8 +4,6 @@ const ServiceModel = require("../models/ServiceModel")
 const NotificationModel = require("../models/NotificationModel")
 const admin = require("firebase-admin")
 const validator = require("validator")
-const bookingModel = require("../models/BookingModel")
-const { promise } = require("bcrypt/promises")
 admin.initializeApp({
   credential: admin.credential.cert(require("../json/serviceAccountKey.json"))
 })
@@ -49,6 +47,9 @@ class BookingRepository {
     try {
       if (repairman_id == userId) {
         return res.status(200).json({ status: 401, message: "Bạn không thể tự đặt dịch vụ của mình" })
+      }
+      if(userDeviceId.deviceToken===""){
+        return res.status(201).json({status:200,message:"Thiết bên kia chưa có diviceToken"})
       }
       const booking = await this.bookingService(address, priceTransport, priceService, userId, service_id, desc,dayRepair, timeRepair,payment)
       if (!booking) {
@@ -96,7 +97,7 @@ class BookingRepository {
     booking.time_repair=timeRepair
     booking.desc = desc
     booking.payment=payment
-    booking.comment="active"
+    booking.comment="inactive"
     await booking.save()
     return booking
   }
@@ -130,9 +131,6 @@ class BookingRepository {
         notification: {
           title: "Fix All Now",
           body: `Thợ ${status}`,
-        },
-        data: {
-          status:"BK"
         }
       }
       switch (option) {
@@ -148,6 +146,7 @@ class BookingRepository {
           return res.status(200).json({ status: 200, message: "Hủy đơn sửa thành công" })
         case 3:
           booking.status = "Đã sửa hoàn thành"
+          booking.comment="active"
           await booking.save()
           await admin.messaging().sendToDevice(user.deviceToken,payloadNotification)
           return res.status(200).json({ status: 200, message: "Chúc mừng bạn đã sửa thành công" })
@@ -185,8 +184,8 @@ class BookingRepository {
           return res.status(500).json({ status: 500, message: 'Giá trị không hợp lệ' });
       }
         const userBookings = await BookingModel.find({ user_id: userId, status: status })
-          .sort({createdAt:-1})
-          .populate({ path: "service_id", select: "image service_name" })
+        .populate({ path: "service_id", select: "image service_name" })
+        .sort({updatedAt:-1})
         if (userBookings.length < 1) {
           return res.status(200).json({ status: 200, data: [] });
         }
@@ -229,8 +228,8 @@ class BookingRepository {
       const bookings = await Promise.all(
         activeServices.map(async (service) => {
           const serviceBookings = await BookingModel.find({ service_id: service._id, status })
-            .sort({createdAt:-1})
-            .populate({ path: "service_id", select: "image service_name" })
+          .populate({ path: "service_id", select: "image service_name" })
+          .sort({updatedAt:-1})
 
           if (serviceBookings.length > 0) {
             return serviceBookings;
@@ -238,7 +237,7 @@ class BookingRepository {
             return [];
           }
         }))
-        const flattenedBookings = bookings.flat();
+        const flattenedBookings = bookings.flat().sort((a, b) => b.updatedAt - a.updatedAt);
       return res.status(200).json({ status: 200, data: flattenedBookings });
     } catch (error) {
       console.error(error)
@@ -252,11 +251,11 @@ class BookingRepository {
       const booking=await BookingModel.findOne({_id:booking_id})
       .populate({
         path: 'user_id',
-        select: 'full_name email'
+        select: 'full_name number_phone image'
       })
       .populate({
         path: 'service_id',
-        select: 'service_name image price'
+        select: 'service_name image price user_id'
       })
       if (!booking) {
         return res.status(200).json({status:400,message:"Không tìm thấy đơn hàng"})
@@ -266,6 +265,38 @@ class BookingRepository {
       return res.status(200).json({status:200,data:booking})
     } catch (error) {
       return res.status(500).json({status:500,message:error.message})
+    }
+  }
+
+  async userCancelBooking(req,res){
+    try {
+      const userId=req.user._id
+      const booking_id=req.params.id
+      const booking=await BookingModel.findOne({_id:booking_id,user_id:userId}).select("service_id")
+      if (!booking) {
+        console.log("oki");
+        return res.status(201).json({status:201,message:"Bạn không thể hủy dịch vụ này"})
+      }
+      const service = await ServiceModel.findOne({ _id: booking.service_id,status: "inactive" })
+      if (!service) {
+        return res.status(201).json({status:201,message:"Bạn không thể hủy dịch vụ này"})
+      }
+      const user=await UserModel.findOne({_id:userId}).select("deviceToken full_name")
+      if (user.deviceToken=="") {
+        return res.status(201).json({status:201,message:"Không thể thông báo đến thợ"})
+      }
+      const payloadNotification = {
+        notification: {
+          title: "Fix All Now",
+          body: `${user.full_name} đã hủy dịch vụ`,
+        },
+      }
+      booking.status="Đã hủy đơn"
+      await booking.save()
+      await admin.messaging().sendToDevice(user.deviceToken,payloadNotification)
+      return res.status(200).json({status:200,message:"Huỷ dịch vụ thành công"})
+    } catch (error) {
+      console.log(error);
     }
   }
 }

@@ -48,7 +48,7 @@ class AuthRepository {
                 }
             }
             const user = new UserModel()
-            user.full_name = full_name.replace(/\b\w/g, match => match.toUpperCase())
+            user.full_name = full_name
             user.email = email
             user.number_phone = number_phone
             user.password = hasPassword
